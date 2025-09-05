@@ -71,36 +71,55 @@ export default function Dashboard() {
     ? vehicleList 
     : vehicleList.filter(v => v.type === selectedWeight);
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) return (
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#15B9CC]"></div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       <Navigation 
         title={`${user.role === "distributor" ? "Distributor" : "Vehicle Owner"} Dashboard`}
         userName={user.name}
         onLogout={handleLogout}
       />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-6 py-8">
         {user.role === "distributor" ? (
           <>
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Filter by Weight Class
-              </label>
-              <select
-                value={selectedWeight}
-                onChange={(e) => setSelectedWeight(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#15B9CC]"
-              >
-                <option value="All">All Vehicles</option>
-                <option value="Heavy">Heavy (20+ tons)</option>
-                <option value="Medium">Medium (10-20 tons)</option>
-                <option value="Light">Light (Under 10 tons)</option>
-              </select>
+            {/* Header Section */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Find Your Perfect Vehicle</h2>
+              <p className="text-gray-600">Browse available vehicles and book the right one for your agricultural needs</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Filter Section */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold text-gray-700 mb-3">
+                    Filter by Vehicle Type
+                  </label>
+                  <select
+                    value={selectedWeight}
+                    onChange={(e) => setSelectedWeight(e.target.value)}
+                    className="w-full sm:w-auto px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#15B9CC] focus:border-transparent bg-white text-gray-900 font-medium"
+                  >
+                    <option value="All">All Vehicles</option>
+                    <option value="Heavy">Heavy (20+ tons)</option>
+                    <option value="Medium">Medium (10-20 tons)</option>
+                    <option value="Light">Light (Under 10 tons)</option>
+                  </select>
+                </div>
+                <div className="text-sm text-gray-500">
+                  Showing {filteredVehicles.length} vehicles
+                </div>
+              </div>
+            </div>
+
+            {/* Vehicles Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredVehicles.map((vehicle) => (
                 <VehicleCard
                   key={vehicle.id}
@@ -120,14 +139,24 @@ export default function Dashboard() {
           </>
         ) : (
           <>
+            {/* Header Section */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Fleet Management</h2>
+              <p className="text-gray-600">Monitor your vehicles, bookings, and revenue performance</p>
+            </div>
+
+            {/* Stats Cards */}
             <div className="grid md:grid-cols-3 gap-6 mb-8">
               <StatsCard title="Total Bookings" value={bookings.length} />
               <StatsCard title="My Vehicles" value={5} color="#f97316" />
-              <StatsCard title="Revenue" value="$2,450" color="#22c55e" />
+              <StatsCard title="Revenue" value="₹2,45,000" color="#22c55e" />
             </div>
 
-            <BookingsTable bookings={bookings} />
-            <FleetTable vehicles={vehicleList} />
+            {/* Tables Section */}
+            <div className="space-y-8">
+              <BookingsTable bookings={bookings} />
+              <FleetTable vehicles={vehicleList} />
+            </div>
           </>
         )}
       </div>
