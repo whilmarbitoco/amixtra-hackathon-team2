@@ -1,8 +1,32 @@
 import Link from "next/link";
+import PageWrapper from "@/components/PageWrapper";
+import { Truck, DollarSign, Bot, Smartphone } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <div className="bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+
+     <PageWrapper>
+       <nav className="max-w-7xl mx-auto p-4">
+        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+          <Link href="/" className="text-2xl font-bold text-[#15B9CC]">
+            AgriLogistics
+          </Link>
+
+          <div className="space-x-6">
+            <Link href="/login" className="text-gray-700 hover:text-[#15B9CC] font-medium">
+              Login
+            </Link>
+            <Link
+              href="/signup"
+              className="bg-[#15B9CC] text-white text-center px-6 py-2.5 rounded-lg hover:bg-[#13a5b7] transition-all duration-300 font-medium"
+            >
+              Sign Up
+            </Link>
+          </div>
+          </div>
+      </nav>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-20">
         <div className="text-center mb-20">
@@ -105,28 +129,28 @@ export default function Home() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🚚</span>
+                <Truck className="w-8 h-8 text-green-600" />
               </div>
               <h4 className="font-bold text-lg mb-2">Real-Time Tracking</h4>
               <p className="text-gray-600 text-sm">Monitor your shipments 24/7 with GPS tracking and live updates</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">💰</span>
+                <DollarSign className="w-8 h-8 text-blue-600" />
               </div>
               <h4 className="font-bold text-lg mb-2">Transparent Pricing</h4>
               <p className="text-gray-600 text-sm">No hidden fees. Get upfront pricing based on distance and load</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🤖</span>
+                <Bot className="w-8 h-8 text-purple-600" />
               </div>
               <h4 className="font-bold text-lg mb-2">AI-Powered Matching</h4>
               <p className="text-gray-600 text-sm">Smart algorithms match you with the perfect vehicle and driver</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📱</span>
+                <Smartphone className="w-8 h-8 text-orange-600" />
               </div>
               <h4 className="font-bold text-lg mb-2">Mobile First</h4>
               <p className="text-gray-600 text-sm">Manage everything from your smartphone, anywhere, anytime</p>
@@ -154,6 +178,8 @@ export default function Home() {
           </div>
         </div>
       </div>
-    </div>
+     </PageWrapper>
+      </div>
+   
   );
 }

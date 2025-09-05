@@ -8,14 +8,9 @@ import StatsCard from "@/components/StatsCard";
 import BookingsTable from "@/components/BookingsTable";
 import FleetTable from "@/components/FleetTable";
 import Navigation from "@/components/Navigation";
+import PageWrapper from "@/components/PageWrapper";
+import { vehicles } from "@/constants";
 
-const vehicles = [
-  { id: 1, type: "Heavy", driver: "John Doe", location: "Warehouse A", status: "Available", capacity: "20 tons", image: "/api/placeholder/300/200", phone: "+1234567890", experience: "5 years" },
-  { id: 2, type: "Medium", driver: "Jane Smith", location: "Farm District", status: "In Transit", capacity: "10 tons", image: "/api/placeholder/300/200", phone: "+1234567891", experience: "3 years" },
-  { id: 3, type: "Light", driver: "Mike Johnson", location: "City Center", status: "Available", capacity: "3 tons", image: "/api/placeholder/300/200", phone: "+1234567892", experience: "2 years" },
-  { id: 4, type: "Heavy", driver: "Sarah Wilson", location: "Port Area", status: "Loading", capacity: "25 tons", image: "/api/placeholder/300/200", phone: "+1234567893", experience: "7 years" },
-  { id: 5, type: "Medium", driver: "Tom Brown", location: "Rural Route", status: "Available", capacity: "12 tons", image: "/api/placeholder/300/200", phone: "+1234567894", experience: "4 years" },
-];
 
 export default function Dashboard() {
   const router = useRouter();
@@ -78,8 +73,9 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
-      <Navigation 
+    <PageWrapper showFooter={false}>
+      <div className="bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+        <Navigation 
         title={`${user.role === "distributor" ? "Distributor" : "Vehicle Owner"} Dashboard`}
         userName={user.name}
         onLogout={handleLogout}
@@ -119,7 +115,7 @@ export default function Dashboard() {
             </div>
 
             {/* Vehicles Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="w-3 mx-a px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
               {filteredVehicles.map((vehicle) => (
                 <VehicleCard
                   key={vehicle.id}
@@ -160,6 +156,7 @@ export default function Dashboard() {
           </>
         )}
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
