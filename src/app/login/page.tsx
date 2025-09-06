@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import PageWrapper from "@/components/PageWrapper";
 
 export default function Login() {
   const router = useRouter();
@@ -49,7 +50,8 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
+    <PageWrapper showFooter={false}>
+      <div className="min-h-screen bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
@@ -89,6 +91,7 @@ export default function Login() {
                 >
                   <option value="distributor">Distributor</option>
                   <option value="vehicle_owner">Vehicle Owner</option>
+                  <option value="driver">Driver</option>
                 </select>
               </div>
             </>
@@ -160,6 +163,7 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 }
