@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { 
-  Home, Truck, LogOut
+  Home, Truck, Package, LogOut
 } from 'lucide-react';
 
 export default function BusinessLayout({
@@ -31,7 +31,8 @@ export default function BusinessLayout({
 
   const navItems = [
     { href: "/business/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
-    { href: "/business/vehicle", icon: <Truck className="h-5 w-5" />, label: "Browse Vehicles" }
+    { href: "/business/vehicle", icon: <Truck className="h-5 w-5" />, label: "Browse Vehicles" },
+    { href: "/business/shipments", icon: <Package className="h-5 w-5" />, label: "My Shipments" }
   ];
 
   if (!user) return (
