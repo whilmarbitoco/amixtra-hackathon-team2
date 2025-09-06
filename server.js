@@ -58,5 +58,5 @@ io.on('connection', (socket) => {
 
 
 server.listen(8080, () => {
-  console.log("Socket.IO server running on port");
+  console.log("Socket.IO server running on port 8080");
 });
