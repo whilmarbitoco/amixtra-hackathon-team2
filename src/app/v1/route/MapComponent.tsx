@@ -16,9 +16,10 @@ L.Icon.Default.mergeOptions({
 interface MapComponentProps {
   route: RouteData | null;
   selectedRouteIndex: number;
+  userLocation?: { lat: number; lng: number; accuracy: number } | null;
 }
 
-export default function MapComponent({ route, selectedRouteIndex }: MapComponentProps) {
+export default function MapComponent({ route, selectedRouteIndex, userLocation }: MapComponentProps) {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +48,7 @@ export default function MapComponent({ route, selectedRouteIndex }: MapComponent
 
     // Remove existing markers and polylines
     map.eachLayer(layer => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+      if (layer instanceof L.Marker || layer instanceof L.Polyline || layer instanceof L.Circle) {
         map.removeLayer(layer);
       }
     });
@@ -92,15 +93,41 @@ export default function MapComponent({ route, selectedRouteIndex }: MapComponent
     L.marker(selectedLatLngs[0], { icon: markerIcon }).addTo(map).bindPopup('Start Location');
     L.marker(selectedLatLngs[selectedLatLngs.length - 1], { icon: markerIcon }).addTo(map).bindPopup('Destination');
 
+    // Add user location if available
+    if (userLocation) {
+      const userIcon = L.icon({
+        iconUrl: 'data:image/svg+xml;base64,' + btoa(`
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6" width="24" height="24">
+            <circle cx="12" cy="12" r="8" fill="#3B82F6" stroke="white" stroke-width="2"/>
+          </svg>
+        `),
+        iconSize: [16, 16],
+        iconAnchor: [8, 8]
+      });
+      
+      L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup('Your Location');
+      
+      // Add accuracy circle
+      L.circle([userLocation.lat, userLocation.lng], {
+        radius: userLocation.accuracy,
+        color: '#3B82F6',
+        fillColor: '#3B82F6',
+        fillOpacity: 0.1,
+        weight: 1
+      }).addTo(map);
+    }
+
     // Fit map to selected route
     const selectedPolyline = L.polyline(selectedLatLngs);
     map.fitBounds(selectedPolyline.getBounds(), { padding: [20, 20] });
-  }, [route, selectedRouteIndex]);
+  }, [route, selectedRouteIndex, userLocation]);
 
   return (
     <div className="relative">
       <div ref={mapContainerRef} className="h-96 w-full" />
-      {route?.routes?.length!! > 1 && (
+      {route?.routes?.length! > 1 && (
         <div className="absolute top-2 right-2 bg-white p-2 rounded shadow text-xs">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-3 h-1 bg-blue-500"></div>
@@ -110,9 +137,13 @@ export default function MapComponent({ route, selectedRouteIndex }: MapComponent
             <div className="w-3 h-1 bg-red-500"></div>
             <span>Heavy Traffic</span>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-1">
             <div className="w-3 h-1 bg-gray-400"></div>
             <span>Alternative</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span>Your Location</span>
           </div>
         </div>
       )}
