@@ -11,14 +11,12 @@ import {
   Minus
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { businessAnalytics, sampleBookings } from "@/constants";
+import { businessAnalytics, sampleBookings, chatMessages } from "@/constants";
 
 export default function BusinessDashboard() {
   const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
-  const [chatMessages, setChatMessages] = useState<{id: string, text: string, isBot: boolean}[]>([
-    {id: '1', text: 'Hello! I\'m your shipping assistant. I can help you find drivers, track shipments, and manage your logistics.', isBot: true}
-  ]);
+  const [chatMessagesState, setChatMessages] = useState<{id: string, text: string, isBot: boolean}[]>(chatMessages.business);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
@@ -38,7 +36,7 @@ export default function BusinessDashboard() {
         body: JSON.stringify({
           messages: [
             { role: 'system', content: 'You are a helpful business assistant for fleet management. Provide concise advice about logistics, fleet operations, business analytics, and transportation management.' },
-            ...chatMessages.map(msg => ({ role: msg.isBot ? 'assistant' : 'user', content: msg.text })),
+            ...chatMessagesState.map(msg => ({ role: msg.isBot ? 'assistant' : 'user', content: msg.text })),
             { role: 'user', content: inputMessage }
           ]
         })
@@ -171,7 +169,7 @@ export default function BusinessDashboard() {
                   <div 
                     key={booking.id} 
                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => router.push('/business/shipments')}
+                    onClick={() => router.push(`/business/shipments?shipmentId=${booking.id}`)}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
@@ -298,7 +296,7 @@ export default function BusinessDashboard() {
           </div>
           
           <div className="h-80 overflow-y-auto p-4 space-y-2">
-            {chatMessages.map((msg) => (
+            {chatMessagesState.map((msg) => (
               <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
                 <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
                   msg.isBot 

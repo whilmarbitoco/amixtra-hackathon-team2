@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { 
   Home, Truck, Package, LogOut
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function BusinessLayout({
   children,
@@ -44,9 +45,11 @@ export default function BusinessLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
       <div className="w-64 bg-white shadow-lg">
+        <Link href="/">
         <div className="p-6 flex items-center justify-center">
           <img src="/gb-logo.png" alt="Logo" className="h-8 w-auto" />
         </div>
+        </Link>
         <nav className="mt-6">
           {navItems.map((item, index) => {
             const isActive = pathname === item.href;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { 
   MapPin, 
   Clock, 
@@ -14,8 +15,20 @@ import {
 import { driverRoutes, mockTransportedCommodities } from "@/constants";
 
 export default function DriverHistory() {
+  const searchParams = useSearchParams();
   const [filter, setFilter] = useState("all");
   const [selectedRoute, setSelectedRoute] = useState<any>(null);
+
+  useEffect(() => {
+    // Check for routeId in URL params and auto-open modal
+    const routeId = searchParams.get('routeId');
+    if (routeId) {
+      const route = driverRoutes.find(r => r.id.toString() === routeId);
+      if (route) {
+        setSelectedRoute(route);
+      }
+    }
+  }, [searchParams]);
 
   const filteredRoutes = driverRoutes.filter(route => {
     if (filter === "all") return true;

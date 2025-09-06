@@ -30,6 +30,7 @@ export default function DriverDashboard() {
   const [showRoutePlannerPrompt, setShowRoutePlannerPrompt] = useState(false);
   const [showDefaultRouteCTA, setShowDefaultRouteCTA] = useState(false);
 
+
   const isTransportationRelated = (message: string) => {
     const keywords = [
       'route', 'navigation', 'directions', 'path', 'way', 'road', 'drive', 'trip', 'journey',
@@ -182,7 +183,7 @@ export default function DriverDashboard() {
           {driverRoutes.map((route) => (
             <div 
               key={route.id} 
-              onClick={() => router.push('/driver/history')}
+              onClick={() => router.push(`/driver/history?routeId=${route.id}`)}
               className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <div className="flex justify-between items-start mb-2">
@@ -311,6 +312,8 @@ export default function DriverDashboard() {
           </div>
         </div>
       )}
+
+
     </>
   );
 }

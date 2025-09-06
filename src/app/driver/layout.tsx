@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { 
   Home, Route, Truck, FileText, Fuel, User, Settings, LogOut
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function DriverLayout({
   children,
@@ -45,9 +46,11 @@ export default function DriverLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
       <div className="w-64 bg-white shadow-lg">
-        <div className="p-6 flex items-center justify-center">
-          <img src="/gb-logo.png" alt="Logo" className="w-6/12" />
+       <Link href="/">
+          <div className="p-6 flex items-center justify-center">
+            <img src="/gb-logo.png" alt="Logo" className="w-6/12" />
         </div>
+       </Link>
         <nav className="mt-6">
           {navItems.map((item, index) => {
             const isActive = pathname === item.href;

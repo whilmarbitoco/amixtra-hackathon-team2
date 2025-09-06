@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { 
   Package, 
   Clock, 
@@ -13,97 +13,35 @@ import {
   MapPin,
   User
 } from "lucide-react";
-
-interface Booking {
-  id: string;
-  distributorName: string;
-  distributorEmail: string;
-  vehicleType: string;
-  capacity: string;
-  bookingDate: string;
-  status: string;
-  pickupLocation: string;
-  deliveryLocation: string;
-  commodityType: string;
-  weight: string;
-  estimatedCost: number;
-}
+import { BusinessShipment, sampleBusinessShipments } from "@/constants";
 
 export default function BusinessShipments() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [filter, setFilter] = useState("all");
-  const [selectedShipment, setSelectedShipment] = useState<Booking | null>(null);
-  const [shipments, setShipments] = useState<Booking[]>([]);
+  const [selectedShipment, setSelectedShipment] = useState<BusinessShipment | null>(null);
+  const [shipments, setShipments] = useState<BusinessShipment[]>([]);
 
   useEffect(() => {
     const storedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
     
     // Add sample data if no bookings exist
     if (storedBookings.length === 0) {
-      const sampleShipments: Booking[] = [
-        {
-          id: "1",
-          distributorName: "Fresh Market Co.",
-          distributorEmail: "orders@freshmarket.com",
-          vehicleType: "Refrigerated Truck",
-          capacity: "5 tons",
-          bookingDate: new Date(Date.now() - 86400000).toISOString(),
-          status: "Confirmed",
-          pickupLocation: "Farm A, Laguna",
-          deliveryLocation: "Metro Manila",
-          commodityType: "Fresh Vegetables",
-          weight: "4.5 tons",
-          estimatedCost: 3500
-        },
-        {
-          id: "2",
-          distributorName: "City Grocers",
-          distributorEmail: "supply@citygrocers.com",
-          vehicleType: "Standard Truck",
-          capacity: "3 tons",
-          bookingDate: new Date(Date.now() - 172800000).toISOString(),
-          status: "In Transit",
-          pickupLocation: "Farm B, Batangas",
-          deliveryLocation: "Quezon City",
-          commodityType: "Rice",
-          weight: "2.8 tons",
-          estimatedCost: 2800
-        },
-        {
-          id: "3",
-          distributorName: "Organic Foods Ltd.",
-          distributorEmail: "logistics@organicfoods.com",
-          vehicleType: "Van",
-          capacity: "1.5 tons",
-          bookingDate: new Date(Date.now() - 259200000).toISOString(),
-          status: "Delivered",
-          pickupLocation: "Farm C, Cavite",
-          deliveryLocation: "Makati",
-          commodityType: "Organic Fruits",
-          weight: "1.2 tons",
-          estimatedCost: 1800
-        },
-        {
-          id: "4",
-          distributorName: "Wholesale Market",
-          distributorEmail: "orders@wholesale.com",
-          vehicleType: "Large Truck",
-          capacity: "8 tons",
-          bookingDate: new Date(Date.now() - 345600000).toISOString(),
-          status: "Pending",
-          pickupLocation: "Farm D, Nueva Ecija",
-          deliveryLocation: "Pasig",
-          commodityType: "Corn",
-          weight: "7.5 tons",
-          estimatedCost: 4200
-        }
-      ];
-      localStorage.setItem("bookings", JSON.stringify(sampleShipments));
-      setShipments(sampleShipments);
+      localStorage.setItem("bookings", JSON.stringify(sampleBusinessShipments));
+      setShipments(sampleBusinessShipments);
     } else {
       setShipments(storedBookings);
     }
-  }, []);
+    
+    // Check for shipmentId in URL params and auto-open modal
+    const shipmentId = searchParams.get('shipmentId');
+    if (shipmentId) {
+      const shipment = [...sampleBusinessShipments, ...storedBookings].find(s => s.id === shipmentId);
+      if (shipment) {
+        setSelectedShipment(shipment);
+      }
+    }
+  }, [searchParams]);
 
   const filteredShipments = shipments.filter(shipment => {
     if (filter === "all") return true;
