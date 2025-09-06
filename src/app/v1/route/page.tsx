@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { io, Socket } from 'socket.io-client';
 import { MapPin, Clock, MessageCircle, Send, Users, Navigation } from 'lucide-react';
 import type { RouteData, LocationSuggestion } from './types';
+import { log } from 'console';
 
 const MapComponent = dynamic(() => import('./MapComponent'), {
   ssr: false,
@@ -80,7 +81,11 @@ export default function RoutePage() {
     // Load route history from localStorage
     const savedHistory = localStorage.getItem('routeHistory');
     if (savedHistory) {
-      setRouteHistory(JSON.parse(savedHistory));
+      const parsedHistory = JSON.parse(savedHistory).map((route: any) => ({
+        ...route,
+        date: new Date(route.date)
+      }));
+      setRouteHistory(parsedHistory);
     }
 
     // Initialize socket connection
@@ -91,6 +96,8 @@ export default function RoutePage() {
     });
     
     newSocket.on('message', (message: ChatMessage) => {
+      console.log(message);
+      
       setChatMessages(prev => [...prev, message]);
     });
     
@@ -210,9 +217,10 @@ export default function RoutePage() {
         localStorage.setItem('routeHistory', JSON.stringify(updatedHistory));
         
         // Join route-specific chat room
-        const routeKey = `${start}-${finish}`.replace(/[^a-zA-Z0-9]/g, '-');
+        const routeKey = `${start.split(',')[0]}-${finish.split(',')[0]}`.replace(/[^a-zA-Z0-9]/g, '-');
         setCurrentRoute(routeKey);
         setChatMessages([]);
+        socket?.emit('joinRoute', routeKey);
       } else {
         setError('Could not calculate route');
       }
@@ -235,7 +243,7 @@ export default function RoutePage() {
       type: 'message'
     };
     
-    socket.emit('sendMessage', { route: currentRoute, message });
+    socket?.emit('sendMessage', { route: currentRoute, message });
     setNewMessage('');
   };
 
@@ -250,7 +258,7 @@ export default function RoutePage() {
       type: 'alert'
     };
     
-    socket.emit('sendMessage', { route: currentRoute, message: alert });
+    socket?.emit('sendMessage', { route: currentRoute, message: alert });
   };
 
   const searchLocations = async (query: string): Promise<LocationSuggestion[]> => {
@@ -379,12 +387,16 @@ export default function RoutePage() {
                 <div className="space-y-3">
                   {routeHistory.map((route) => (
                     <div key={route.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
-                         onClick={() => { setStart(route.from); setFinish(route.to); }}>
+                         onClick={() => { 
+                           setStart(route.from); 
+                           setFinish(route.to);
+                           setTimeout(() => handleRouteCalculation(), 100);
+                         }}>
                       <div className="text-sm font-medium text-gray-900 mb-1">
                         {route.from.split(',')[0]} → {route.to.split(',')[0]}
                       </div>
                       <div className="text-xs text-gray-500">
-                        {route.date.toLocaleDateString()} • {Math.round(route.duration / 60)}min
+                        {route.date?.toLocaleDateString()} • {Math.round(route.duration / 60)}min
                       </div>
                     </div>
                   ))}
@@ -554,7 +566,7 @@ export default function RoutePage() {
                     <div className="flex justify-between items-start mb-1">
                       <span className="font-medium text-sm text-gray-900">{msg.user}</span>
                       <span className="text-xs text-gray-500">
-                        {msg.timestamp.toLocaleTimeString()}
+                        {msg.timestamp.toString()}
                       </span>
                     </div>
                     <p className="text-sm text-gray-700">{msg.message}</p>
