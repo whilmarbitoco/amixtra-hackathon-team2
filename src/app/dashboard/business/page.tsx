@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { io, Socket } from 'socket.io-client';
 import { useRouter } from "next/navigation";
 import { 
   Navigation,
@@ -67,41 +66,6 @@ export default function BusinessDashboard() {
     localStorage.removeItem("currentUser");
     router.push("/");
   };
-  
-  useEffect(() => {
-    // Initialize socket connection
-    const newSocket = io('http://localhost:3001');
-    
-    newSocket.on('connect', () => {
-      console.log('Connected to chat server');
-    });
-    
-    newSocket.on('message', (message: ChatMessage) => {
-      setChatMessages(prev => [...prev, message]);
-    });
-    
-    newSocket.on('userCount', (count: number) => {
-      setConnectedUsers(count);
-    });
-    
-    setSocket(newSocket);
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (startInputRef.current && !startInputRef.current.contains(event.target as Node)) {
-        setShowStartSuggestions(false);
-      }
-      if (finishInputRef.current && !finishInputRef.current.contains(event.target as Node)) {
-        setShowFinishSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      newSocket.disconnect();
-    };
-  }, []);
 
   // Auto-scroll chat to bottom
   useEffect(() => {

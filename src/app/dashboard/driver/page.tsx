@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from "next/navigation";
-import { io, Socket } from 'socket.io-client';
 import { 
   Truck, 
   Navigation,
@@ -58,41 +57,6 @@ export default function DriverDashboard() {
     router.push("/");
   };
   
-  useEffect(() => {
-    // Initialize socket connection
-    const newSocket = io('http://localhost:3001');
-    
-    newSocket.on('connect', () => {
-      console.log('Connected to chat server');
-    });
-    
-    newSocket.on('message', (message: ChatMessage) => {
-      setChatMessages(prev => [...prev, message]);
-    });
-    
-    newSocket.on('userCount', (count: number) => {
-      setConnectedUsers(count);
-    });
-    
-    setSocket(newSocket);
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (startInputRef.current && !startInputRef.current.contains(event.target as Node)) {
-        setShowStartSuggestions(false);
-      }
-      if (finishInputRef.current && !finishInputRef.current.contains(event.target as Node)) {
-        setShowFinishSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      newSocket.disconnect();
-    };
-  }, []);
-
   // Auto-scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -146,6 +110,7 @@ export default function DriverDashboard() {
     };
     
     socket.emit('sendMessage', { route: currentRoute, message });
+    setChatMessages(prev => [...prev, message]);
     setNewMessage('');
   };
 
