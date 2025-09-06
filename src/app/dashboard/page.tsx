@@ -25,7 +25,18 @@ export default function Dashboard() {
     if (!currentUser) {
       router.push("/login");
     } else {
-      setUser(JSON.parse(currentUser));
+      const userData = JSON.parse(currentUser);
+      setUser(userData);
+      
+      // Route based on user role
+      if (userData.role === "driver") {
+        router.push("/dashboard/driver");
+        return;
+      } else if (userData.role === "vehicle_owner") {
+        router.push("/dashboard/business");
+        return;
+      }
+      
       const storedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
       setBookings(storedBookings);
     }

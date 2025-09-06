@@ -91,6 +91,7 @@ export default function Login() {
                 >
                   <option value="distributor">Distributor</option>
                   <option value="vehicle_owner">Vehicle Owner</option>
+                  <option value="driver">Driver</option>
                 </select>
               </div>
             </>

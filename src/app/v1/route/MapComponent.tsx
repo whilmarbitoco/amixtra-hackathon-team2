@@ -100,7 +100,7 @@ export default function MapComponent({ route, selectedRouteIndex }: MapComponent
   return (
     <div className="relative">
       <div ref={mapContainerRef} className="h-96 w-full" />
-      {route?.routes?.length > 1 && (
+      {route?.routes?.length!! > 1 && (
         <div className="absolute top-2 right-2 bg-white p-2 rounded shadow text-xs">
           <div className="flex items-center gap-2 mb-1">
             <div className="w-3 h-1 bg-blue-500"></div>
