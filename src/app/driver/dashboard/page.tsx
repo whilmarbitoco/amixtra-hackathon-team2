@@ -169,7 +169,7 @@ export default function DriverDashboard() {
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Ask about driving..."
                 disabled={loading}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 text-black"
               />
               <button
                 onClick={sendMessage}
