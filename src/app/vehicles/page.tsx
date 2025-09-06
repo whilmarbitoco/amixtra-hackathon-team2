@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Truck, MapPin, Clock, DollarSign, User, Phone } from "lucide-react";
 import { vehicles } from "@/constants";
+import ListingWrapper from "@/components/ListingWrapper";
 
 export default function VehiclesListing() {
   const [filter, setFilter] = useState("All");
@@ -12,25 +13,28 @@ export default function VehiclesListing() {
     : vehicles.filter(v => v.status === filter);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b px-6 py-4">
-        <h1 className="text-3xl font-bold text-gray-900">Available Vehicles</h1>
-        <p className="text-gray-600 mt-2">Browse and book vehicles for your transportation needs</p>
-      </div>
-
+    <ListingWrapper 
+      title="Available Vehicles" 
+      description="Browse and book vehicles for your transportation needs"
+    >
       <div className="container mx-auto px-6 py-8">
         {/* Filter */}
         <div className="mb-8">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="All">All Vehicles</option>
-            <option value="Available">Available</option>
-            <option value="In Transit">In Transit</option>
-            <option value="Loading">Loading</option>
-          </select>
+          <div className="flex gap-3">
+            {['All', 'Available', 'In Transit', 'Loading'].map((status) => (
+              <button
+                key={status}
+                onClick={() => setFilter(status)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filter === status
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {status === 'All' ? 'All Vehicles' : status}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Vehicle Cards */}
@@ -98,6 +102,6 @@ export default function VehiclesListing() {
           ))}
         </div>
       </div>
-    </div>
+    </ListingWrapper>
   );
 }

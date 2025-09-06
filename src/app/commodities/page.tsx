@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Package, MapPin, Calendar, DollarSign, Phone, AlertCircle, Weight } from "lucide-react";
 import { commodities } from "@/constants";
+import ListingWrapper from "@/components/ListingWrapper";
 
 export default function CommoditiesListing() {
   const [filter, setFilter] = useState("All");
@@ -12,25 +13,28 @@ export default function CommoditiesListing() {
     : commodities.filter(c => c.urgency === filter);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b px-6 py-4">
-        <h1 className="text-3xl font-bold text-gray-900">Commodity Listings</h1>
-        <p className="text-gray-600 mt-2">Find transportation requests for agricultural commodities</p>
-      </div>
-
+    <ListingWrapper 
+      title="Commodity Listings" 
+      description="Find transportation requests for agricultural commodities"
+    >
       <div className="container mx-auto px-6 py-8">
         {/* Filter */}
         <div className="mb-8">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            <option value="All">All Requests</option>
-            <option value="High">High Urgency</option>
-            <option value="Medium">Medium Urgency</option>
-            <option value="Low">Low Urgency</option>
-          </select>
+          <div className="flex gap-3">
+            {['All', 'High', 'Medium', 'Low'].map((urgency) => (
+              <button
+                key={urgency}
+                onClick={() => setFilter(urgency)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  filter === urgency
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                {urgency === 'All' ? 'All Requests' : `${urgency} Priority`}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Commodity Cards */}
@@ -92,6 +96,6 @@ export default function CommoditiesListing() {
           ))}
         </div>
       </div>
-    </div>
+    </ListingWrapper>
   );
 }
