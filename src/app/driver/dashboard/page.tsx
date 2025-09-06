@@ -27,11 +27,25 @@ export default function DriverDashboard() {
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(true);
+  const [showRoutePlannerPrompt, setShowRoutePlannerPrompt] = useState(false);
+  const [showDefaultRouteCTA, setShowDefaultRouteCTA] = useState(false);
+
+  const isTransportationRelated = (message: string) => {
+    const keywords = [
+      'route', 'navigation', 'directions', 'path', 'way', 'road', 'drive', 'trip', 'journey',
+      'destination', 'location', 'address', 'traffic', 'fastest', 'shortest', 'quickest',
+      'avoid', 'toll', 'highway', 'street', 'map', 'gps', 'navigate', 'travel', 'distance',
+      'time', 'eta', 'arrival', 'departure', 'fuel', 'gas', 'cost', 'efficient', 'optimize'
+    ];
+    return keywords.some(keyword => message.toLowerCase().includes(keyword));
+  };
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return;
 
     const userMessage = {id: Date.now().toString(), text: inputMessage, isBot: false};
+    const isTransportQuestion = isTransportationRelated(inputMessage);
+    
     setChatMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setLoading(true);
@@ -51,11 +65,23 @@ export default function DriverDashboard() {
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || 'Sorry, I couldn\'t process that request.';
+      
       setChatMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(), 
         text: content, 
         isBot: true
       }]);
+
+      // Check if AI response or conversation context suggests transportation topics
+      const aiSuggestsTransport = content.toLowerCase().includes('route') || 
+                                 content.toLowerCase().includes('navigation') ||
+                                 content.toLowerCase().includes('drive') ||
+                                 content.toLowerCase().includes('traffic');
+      
+      if (isTransportQuestion || aiSuggestsTransport) {
+        setShowRoutePlannerPrompt(true);
+        setShowDefaultRouteCTA(true);
+      }
     } catch (error) {
       setChatMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(), 
@@ -65,8 +91,6 @@ export default function DriverDashboard() {
     }
     setLoading(false);
   };
-
-
 
   return (
     <>
@@ -228,6 +252,34 @@ export default function DriverDashboard() {
                 </div>
               </div>
             )}
+            
+            {showRoutePlannerPrompt && (
+              <div className="flex justify-start mt-2">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-w-xs">
+                  <p className="text-sm text-gray-700 mb-2">I noticed you're asking about transportation. Would you like me to open the route planner?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        router.push('/v1/route');
+                        setShowRoutePlannerPrompt(false);
+                      }}
+                      className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors"
+                    >
+                      <Route className="h-3 w-3" />
+                      Yes, Open
+                    </button>
+                    <button
+                      onClick={() => setShowRoutePlannerPrompt(false)}
+                      className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-300 transition-colors"
+                    >
+                      No, Thanks
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+          
           </div>
           
           <div className="p-4 border-t border-gray-200">

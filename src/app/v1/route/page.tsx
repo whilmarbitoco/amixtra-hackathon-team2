@@ -389,22 +389,14 @@ export default function RoutePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="text-black py-6 px-4 mb-2">
+      <div className="py-6 px-4 mb-2">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 mb-2">
-            <button
-              onClick={() => router.push('/driver/dashboard')}
-              className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              Back to Dashboard
-            </button>
-          </div>
-          <h1 className="text-3xl font-bold mb-2">Smart Route Navigator</h1>
-          <p className="text-black/90">Plan your journey with AI-optimized routes that adapt to real-time conditions</p>
+
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Smart Route Navigator</h1>
+          <p className="text-gray-600">Plan your journey with AI-optimized routes that adapt to real-time conditions</p>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4 pb-8">
         
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Left Sidebar - Route History & Current Location */}
@@ -476,6 +468,17 @@ export default function RoutePage() {
               ) : (
                 <p className="text-sm text-gray-500">No recent routes</p>
               )}
+            </div>
+
+            {/* Back to Dashboard */}
+            <div className="bg-white rounded-lg shadow-md p-4">
+              <button
+                onClick={() => router.push('/driver/dashboard')}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Dashboard
+              </button>
             </div>
           </div>
 
