@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
   Home, Route, Truck, FileText, Fuel, User, Settings, LogOut
 } from 'lucide-react';
@@ -12,6 +12,7 @@ export default function DriverLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -46,16 +47,23 @@ export default function DriverLayout({
           <h2 className="text-xl font-bold text-gray-900">Driver Panel</h2>
         </div>
         <nav className="mt-6">
-          {navItems.map((item, index) => (
-            <a 
-              key={index}
-              href={item.href} 
-              className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50"
-            >
-              {item.icon}
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item, index) => {
+            const isActive = pathname === item.href;
+            return (
+              <a 
+                key={index}
+                href={item.href} 
+                className={`flex items-center gap-3 px-6 py-3 transition-colors ${
+                  isActive 
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600' 
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </a>
+            );
+          })}
           <button 
             onClick={handleLogout} 
             className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 w-full text-left"
