@@ -41,16 +41,14 @@ export default function VehiclesListing() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVehicles.map((vehicle) => (
             <div key={vehicle.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-              <img 
-                src={vehicle.image} 
-                alt={`${vehicle.type} Vehicle`}
-                className="w-full h-48 object-cover"
-              />
+              <div className="w-full h-32 bg-gray-200 flex items-center justify-center">
+                <Truck className="h-10 w-10 text-gray-400" />
+              </div>
               
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">{vehicle.type} Vehicle</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-lg font-bold text-gray-900">{vehicle.type}</h3>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     vehicle.status === 'Available' ? 'bg-green-100 text-green-800' :
                     vehicle.status === 'In Transit' ? 'bg-yellow-100 text-yellow-800' :
                     'bg-blue-100 text-blue-800'
@@ -59,40 +57,30 @@ export default function VehiclesListing() {
                   </span>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span>{vehicle.driver} ({vehicle.experience})</span>
+                <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
+                  <div className="flex items-center gap-1">
+                    <Truck className="h-3 w-3" />
+                    <span>{vehicle.capacity}</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <MapPin className="h-4 w-4" />
-                    <span>{vehicle.route}</span>
+                  <div className="flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>Routes</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    <span>{vehicle.time}</span>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span>Ready</span>
                   </div>
                   
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Truck className="h-4 w-4" />
-                    <span>{vehicle.capacity} capacity</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <DollarSign className="h-4 w-4" />
-                    <span>₹{vehicle.chargePerKg}/kg</span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Phone className="h-4 w-4" />
-                    <span>{vehicle.phone}</span>
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="h-3 w-3" />
+                    <span>Rates</span>
                   </div>
                 </div>
 
                 <button 
-                  className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                   disabled={vehicle.status !== 'Available'}
                 >
                   {vehicle.status === 'Available' ? 'Book Vehicle' : 'Not Available'}

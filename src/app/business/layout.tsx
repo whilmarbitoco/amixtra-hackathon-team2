@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { 
-  Home, Truck, Calendar, UserCheck, BarChart3, FileText, Settings, LogOut
+  Home, Truck, LogOut
 } from 'lucide-react';
 
 export default function BusinessLayout({
@@ -12,6 +12,7 @@ export default function BusinessLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
@@ -30,12 +31,7 @@ export default function BusinessLayout({
 
   const navItems = [
     { href: "/business/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
-    { href: "#", icon: <Truck className="h-5 w-5" />, label: "Fleet Management" },
-    { href: "#", icon: <Calendar className="h-5 w-5" />, label: "Bookings" },
-    { href: "#", icon: <UserCheck className="h-5 w-5" />, label: "Drivers" },
-    { href: "#", icon: <BarChart3 className="h-5 w-5" />, label: "Analytics" },
-    { href: "#", icon: <FileText className="h-5 w-5" />, label: "Reports" },
-    { href: "#", icon: <Settings className="h-5 w-5" />, label: "Settings" },
+    { href: "/business/vehicle", icon: <Truck className="h-5 w-5" />, label: "Browse Vehicles" }
   ];
 
   if (!user) return (
@@ -51,16 +47,23 @@ export default function BusinessLayout({
           <h2 className="text-xl font-bold text-gray-900">Business Panel</h2>
         </div>
         <nav className="mt-6">
-          {navItems.map((item, index) => (
-            <a 
-              key={index}
-              href={item.href} 
-              className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50"
-            >
-              {item.icon}
-              {item.label}
-            </a>
-          ))}
+          {navItems.map((item, index) => {
+            const isActive = pathname === item.href;
+            return (
+              <a 
+                key={index}
+                href={item.href} 
+                className={`flex items-center gap-3 px-6 py-3 transition-colors ${
+                  isActive 
+                    ? 'bg-emerald-100 text-emerald-700 border-r-2 border-emerald-600' 
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {item.icon}
+                {item.label}
+              </a>
+            );
+          })}
           <button 
             onClick={handleLogout} 
             className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 w-full text-left"
