@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 import { io, Socket } from 'socket.io-client';
-import { MapPin, Clock, MessageCircle, Send, Users, Navigation } from 'lucide-react';
+import { MapPin, Clock, MessageCircle, Send, Users, Navigation, ArrowLeft } from 'lucide-react';
 import type { RouteData, LocationSuggestion } from './types';
 import { log } from 'console';
 
@@ -36,6 +37,7 @@ interface UserLocation {
 }
 
 export default function RoutePage() {
+  const router = useRouter();
   const [start, setStart] = useState('');
   const [finish, setFinish] = useState('');
   const [route, setRoute] = useState<RouteData | null>(null);
@@ -389,6 +391,15 @@ export default function RoutePage() {
     <div className="min-h-screen bg-gray-50">
       <div className="text-black py-6 px-4 mb-2">
         <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              onClick={() => router.push('/driver/dashboard')}
+              className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Back to Dashboard
+            </button>
+          </div>
           <h1 className="text-3xl font-bold mb-2">Smart Route Navigator</h1>
           <p className="text-black/90">Plan your journey with AI-optimized routes that adapt to real-time conditions</p>
         </div>
