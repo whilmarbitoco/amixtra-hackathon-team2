@@ -3,28 +3,41 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "@/lib/auth";
 
 export default function Login() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const user = users.find((u: any) => u.email === email && u.password === password);
-    
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
+    try {
+      const user = await signIn(email, password);
       
-      if (user.role === "distributor") {
+      // Store user data for backward compatibility
+      localStorage.setItem("currentUser", JSON.stringify({
+        id: user.id,
+        name: user.fullname,
+        email: user.email,
+        role: user.role === "BUSINESS_OWNER" ? "business" : "driver"
+      }));
+      
+      if (user.role === "business_owner") {
         router.push("/business/dashboard");
-      } else if (user.role === "driver" || user.role === "vehicle_owner") {
+      } else if (user.role === "driver") {
         router.push("/driver/dashboard");
       }
-    } else {
-      alert("Invalid credentials");
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,11 +81,18 @@ export default function Login() {
                 />
               </div>
 
+              {error && (
+                <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-emerald-600 text-white py-4 px-6 rounded-xl hover:bg-emerald-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+                disabled={loading}
+                className="w-full bg-emerald-600 text-white py-4 px-6 rounded-xl hover:bg-emerald-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign In Securely
+                {loading ? "Signing In..." : "Sign In Securely"}
               </button>
             </form>
 

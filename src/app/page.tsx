@@ -52,10 +52,10 @@ export default function Home() {
               Start Shipping Securely
             </Link>
             <Link
-              href="/dashboard"
+              href="/signup"
               className="border-2 border-emerald-600 text-emerald-600 px-10 py-4 rounded-xl hover:bg-emerald-600 hover:text-white transition-all duration-300 font-semibold"
             >
-              View Platform
+              Register Now
             </Link>
           </div>
           

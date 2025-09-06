@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Building2 } from "lucide-react";
+import { signUp } from "@/lib/auth";
 
 export default function BusinessSignup() {
   const router = useRouter();
@@ -17,25 +18,38 @@ export default function BusinessSignup() {
     phone: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
+      setLoading(false);
       return;
     }
     
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const newUser = { 
-      ...formData, 
-      role: "distributor",
-      createdAt: new Date().toISOString()
-    };
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    
-    alert("Business account created successfully!");
-    router.push("/login");
+    try {
+      await signUp({
+        fullname: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        role: "business_owner",
+        company: formData.companyName,
+        business: formData.businessType
+      });
+      
+      alert("Business account created successfully!");
+      router.push("/login");
+    } catch (err: any) {
+      setError(err.message || "Failed to create account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -176,11 +190,18 @@ export default function BusinessSignup() {
             </div>
             </div>
 
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-emerald-600 text-white py-4 px-6 rounded-xl hover:bg-emerald-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+              disabled={loading}
+              className="w-full bg-emerald-600 text-white py-4 px-6 rounded-xl hover:bg-emerald-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Business Account
+              {loading ? "Creating Account..." : "Create Business Account"}
             </button>
           </form>
 

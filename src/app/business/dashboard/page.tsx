@@ -136,7 +136,7 @@ export default function BusinessDashboard() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="h-4 w-4" />
-                    <span>GPS Tracking</span>
+                    <span>GPS   Tracking</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Bot className="h-4 w-4" />

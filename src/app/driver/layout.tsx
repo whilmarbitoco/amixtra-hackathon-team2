@@ -6,6 +6,8 @@ import {
   Home, Route, Truck, FileText, Fuel, User, Settings, LogOut
 } from 'lucide-react';
 import Link from 'next/link';
+import { checkUserRole, setLegacyUserData } from '@/lib/auth-helpers';
+import { signOut } from '@/lib/auth';
 
 export default function DriverLayout({
   children,
@@ -17,17 +19,25 @@ export default function DriverLayout({
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const currentUser = localStorage.getItem("currentUser");
-    if (!currentUser) {
-      router.push("/login");
-    } else {
-      setUser(JSON.parse(currentUser));
+    const checkUser = async () => {
+      const userWithProfile = await checkUserRole('driver')
+      
+      if (!userWithProfile) {
+        router.push("/login")
+        return
+      }
+      
+      setUser(userWithProfile)
+      setLegacyUserData(userWithProfile)
     }
+    
+    checkUser()
   }, [router]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    router.push("/");
+  const handleLogout = async () => {
+    await signOut()
+    localStorage.removeItem("currentUser")
+    router.push("/")
   };
 
   const navItems = [
@@ -37,14 +47,8 @@ export default function DriverLayout({
     { href: "/driver/history", icon: <Route className="h-5 w-5" />, label: "Trip History" },
   ];
 
-  if (!user) return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex">
       <div className="w-64 bg-white shadow-lg">
        <Link href="/">
           <div className="p-6 flex items-center justify-center">
@@ -60,7 +64,7 @@ export default function DriverLayout({
                 href={item.href} 
                 className={`flex items-center gap-3 px-6 py-3 transition-colors ${
                   isActive 
-                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600' 
+                    ? 'bg-emerald-100 text-emerald-700 border-r-2 border-emerald-600' 
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >
@@ -83,7 +87,7 @@ export default function DriverLayout({
         <div className="bg-white shadow-sm border-b px-6 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">Driver Portal</h1>
-            <span className="text-gray-600">Welcome, {user?.name}</span>
+            <span className="text-gray-600">Welcome, {user?.fullname || user?.name}</span>
           </div>
         </div>
 

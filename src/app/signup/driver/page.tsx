@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Truck } from "lucide-react";
+import { signUp } from "@/lib/auth";
 
 export default function DriverSignup() {
   const router = useRouter();
@@ -19,25 +20,37 @@ export default function DriverSignup() {
     experience: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError("");
     
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords don't match");
+      setError("Passwords don't match");
+      setLoading(false);
       return;
     }
     
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
-    const newUser = { 
-      ...formData, 
-      role: "driver",
-      createdAt: new Date().toISOString()
-    };
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-    
-    alert("Driver account created successfully!");
-    router.push("/login");
+    try {
+      await signUp({
+        fullname: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        password: formData.password,
+        role: "driver",
+        license: formData.licenseNumber
+      });
+      
+      alert("Driver account created successfully!");
+      router.push("/login");
+    } catch (err: any) {
+      setError(err.message || "Failed to create account");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -50,15 +63,14 @@ export default function DriverSignup() {
   return (
     <div className="min-h-screen bg-gradient-to-br py-7 from-emerald-50 via-white to-blue-50 flex items-center justify-center px-4">
       <div className="w-full max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-  
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Driver Account</h2>
-          <p className="text-gray-600">Start earning with guaranteed payments</p>
-        </div>
-
+    
         {/* Form Card */}
         <div className="bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Driver Account</h2>
+            <p className="text-gray-600">Start earning with guaranteed payments</p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -126,67 +138,6 @@ export default function DriverSignup() {
             </div>
 
             <div>
-              <label htmlFor="vehicleType" className="block text-sm font-medium text-gray-700 mb-2">
-                Vehicle Type
-              </label>
-              <select
-                id="vehicleType"
-                name="vehicleType"
-                value={formData.vehicleType}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900"
-                required
-              >
-                <option value="">Select vehicle type</option>
-                <option value="van">Van</option>
-                <option value="light-truck">Light Truck</option>
-                <option value="medium-truck">Medium Truck</option>
-                <option value="heavy-truck">Heavy Truck</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="vehicleCapacity" className="block text-sm font-medium text-gray-700 mb-2">
-                Vehicle Capacity
-              </label>
-              <select
-                id="vehicleCapacity"
-                name="vehicleCapacity"
-                value={formData.vehicleCapacity}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900"
-                required
-              >
-                <option value="">Select capacity</option>
-                <option value="1-3 tons">1-3 tons</option>
-                <option value="3-5 tons">3-5 tons</option>
-                <option value="5-10 tons">5-10 tons</option>
-                <option value="10-15 tons">10-15 tons</option>
-                <option value="15+ tons">15+ tons</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-2">
-                Driving Experience
-              </label>
-              <select
-                id="experience"
-                name="experience"
-                value={formData.experience}
-                onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900"
-                required
-              >
-                <option value="">Select experience</option>
-                <option value="1-2 years">1-2 years</option>
-                <option value="3-5 years">3-5 years</option>
-                <option value="5-10 years">5-10 years</option>
-                <option value="10+ years">10+ years</option>
-              </select>
-            </div>
-
-            <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
@@ -219,11 +170,18 @@ export default function DriverSignup() {
             </div>
             </div>
 
+            {error && (
+              <div className="text-red-600 text-sm text-center bg-red-50 p-3 rounded-lg">
+                {error}
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-4 px-6 rounded-xl hover:bg-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create Driver Account
+              {loading ? "Creating Account..." : "Create Driver Account"}
             </button>
           </form>
 
