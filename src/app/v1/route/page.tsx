@@ -89,7 +89,7 @@ export default function RoutePage() {
     }
 
     // Initialize socket connection
-    const newSocket = io('http://localhost:8080');
+    const newSocket = io('http://18.139.160.100:8080');
     
     newSocket.on('connect', () => {
       console.log('Connected to chat server');

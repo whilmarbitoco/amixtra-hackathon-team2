@@ -132,29 +132,13 @@ export default function DriverDashboard() {
             <Home className="h-5 w-5" />
             Dashboard
           </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
+          <a href="/v1/route" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
             <Route className="h-5 w-5" />
             My Routes
           </a>
           <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
             <Truck className="h-5 w-5" />
             Vehicle Info
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
-            <FileText className="h-5 w-5" />
-            Trip History
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
-            <Fuel className="h-5 w-5" />
-            Fuel Log
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
-            <User className="h-5 w-5" />
-            Profile
-          </a>
-          <a href="#" className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50">
-            <Settings className="h-5 w-5" />
-            Settings
           </a>
           <button onClick={handleLogout} className="flex items-center gap-3 px-6 py-3 text-red-600 hover:bg-red-50 w-full text-left">
             <LogOut className="h-5 w-5" />
