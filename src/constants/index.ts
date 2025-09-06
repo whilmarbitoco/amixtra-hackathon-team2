@@ -1,41 +1,238 @@
-export const vehicles = [
-  { id: 1, type: "Heavy", driver: "John Doe", location: "Warehouse A", status: "Available", capacity: "20 tons", image: "/api/placeholder/300/200", phone: "+1234567890", experience: "5 years", route: "Mumbai - Delhi", time: "24 hours", chargePerKg: 15 },
-  { id: 2, type: "Medium", driver: "Jane Smith", location: "Farm District", status: "In Transit", capacity: "10 tons", image: "/api/placeholder/300/200", phone: "+1234567891", experience: "3 years", route: "Pune - Bangalore", time: "18 hours", chargePerKg: 12 },
-  { id: 3, type: "Light", driver: "Mike Johnson", location: "City Center", status: "Available", capacity: "3 tons", image: "/api/placeholder/300/200", phone: "+1234567892", experience: "2 years", route: "Chennai - Hyderabad", time: "8 hours", chargePerKg: 18 },
-  { id: 4, type: "Heavy", driver: "Sarah Wilson", location: "Port Area", status: "Loading", capacity: "25 tons", image: "/api/placeholder/300/200", phone: "+1234567893", experience: "7 years", route: "Kolkata - Ahmedabad", time: "30 hours", chargePerKg: 14 },
-  { id: 5, type: "Medium", driver: "Tom Brown", location: "Rural Route", status: "Available", capacity: "12 tons", image: "/api/placeholder/300/200", phone: "+1234567894", experience: "4 years", route: "Jaipur - Lucknow", time: "12 hours", chargePerKg: 16 },
+export interface Commodity {
+  id: string;
+  name: string;
+  status: 'in-transit' | 'delivered' | 'delayed' | 'pending';
+  currentLocation: { lat: number; lng: number };
+  destination: { lat: number; lng: number; address: string };
+  estimatedArrival: Date;
+  driver: string;
+  lastUpdate: Date;
+}
+
+export interface TrackingMessage {
+  id: string;
+  user: string;
+  message: string;
+  timestamp: Date;
+  type: 'message' | 'alert' | 'status';
+}
+
+export const mockCommodities: Commodity[] = [
+  {
+    id: 'COM001',
+    name: 'Rice Shipment - 50 tons',
+    status: 'in-transit',
+    currentLocation: { lat: 7.0731, lng: 125.6128 },
+    destination: { lat: 7.2906, lng: 125.6800, address: 'Tagum City, Davao del Norte' },
+    estimatedArrival: new Date(Date.now() + 2 * 60 * 60 * 1000),
+    driver: 'Juan Dela Cruz',
+    lastUpdate: new Date()
+  },
+  {
+    id: 'COM002',
+    name: 'Banana Export - 100 boxes',
+    status: 'delivered',
+    currentLocation: { lat: 7.1907, lng: 125.4553 },
+    destination: { lat: 7.1907, lng: 125.4553, address: 'Digos City, Davao del Sur' },
+    estimatedArrival: new Date(Date.now() - 1 * 60 * 60 * 1000),
+    driver: 'Maria Santos',
+    lastUpdate: new Date(Date.now() - 30 * 60 * 1000)
+  },
+  {
+    id: 'COM003',
+    name: 'Coconut Oil - 200 liters',
+    status: 'delayed',
+    currentLocation: { lat: 7.1500, lng: 125.5000 },
+    destination: { lat: 7.3500, lng: 125.7000, address: 'Panabo City, Davao del Norte' },
+    estimatedArrival: new Date(Date.now() + 4 * 60 * 60 * 1000),
+    driver: 'Pedro Gonzales',
+    lastUpdate: new Date(Date.now() - 15 * 60 * 1000)
+  },
+  {
+    id: 'COM004',
+    name: 'Durian Fruits - 80 boxes',
+    status: 'pending',
+    currentLocation: { lat: 7.0600, lng: 125.6000 },
+    destination: { lat: 6.9000, lng: 125.3000, address: 'General Santos City' },
+    estimatedArrival: new Date(Date.now() + 6 * 60 * 60 * 1000),
+    driver: 'Ana Reyes',
+    lastUpdate: new Date(Date.now() - 5 * 60 * 1000)
+  },
+  {
+    id: 'COM005',
+    name: 'Coffee Beans - 30 sacks',
+    status: 'in-transit',
+    currentLocation: { lat: 7.2000, lng: 125.4500 },
+    destination: { lat: 7.4000, lng: 125.8000, address: 'Mati City, Davao Oriental' },
+    estimatedArrival: new Date(Date.now() + 3 * 60 * 60 * 1000),
+    driver: 'Roberto Cruz',
+    lastUpdate: new Date(Date.now() - 2 * 60 * 1000)
+  },
+  {
+    id: 'COM006',
+    name: 'Pineapple Cans - 500 units',
+    status: 'in-transit',
+    currentLocation: { lat: 7.1200, lng: 125.6500 },
+    destination: { lat: 6.7500, lng: 125.2000, address: 'Koronadal City, South Cotabato' },
+    estimatedArrival: new Date(Date.now() + 5 * 60 * 60 * 1000),
+    driver: 'Carmen Lopez',
+    lastUpdate: new Date(Date.now() - 8 * 60 * 1000)
+  }
 ];
 
-export const commodities = [
-  { id: 1, title: "Rice Shipment", from: "Punjab", to: "Kerala", weight: "15 tons", commodity: "Basmati Rice", urgency: "Medium", budget: "₹45,000", contact: "Raj Farms", phone: "+91-9876543210", deadline: "2024-01-20" },
-  { id: 2, title: "Wheat Transport", from: "Haryana", to: "Tamil Nadu", weight: "20 tons", commodity: "Wheat Grains", urgency: "High", budget: "₹60,000", contact: "Grain Traders", phone: "+91-9876543211", deadline: "2024-01-18" },
-  { id: 3, title: "Vegetable Delivery", from: "Maharashtra", to: "Gujarat", weight: "5 tons", commodity: "Mixed Vegetables", urgency: "High", budget: "₹25,000", contact: "Fresh Produce Co", phone: "+91-9876543212", deadline: "2024-01-16" },
-  { id: 4, title: "Fertilizer Transport", from: "Rajasthan", to: "Uttar Pradesh", weight: "30 tons", commodity: "Organic Fertilizer", urgency: "Low", budget: "₹75,000", contact: "AgriSupply Ltd", phone: "+91-9876543213", deadline: "2024-01-25" },
-  { id: 5, title: "Seed Distribution", from: "Karnataka", to: "Andhra Pradesh", weight: "8 tons", commodity: "Cotton Seeds", urgency: "Medium", budget: "₹35,000", contact: "Seed Corp", phone: "+91-9876543214", deadline: "2024-01-22" },
-];
-
-export const driverRoutes = [
-  { id: 1, from: "Warehouse A", to: "Farm District", distance: "45 km", duration: "2h 30m", date: "2024-01-15", status: "Completed" },
-  { id: 2, from: "City Center", to: "Port Area", distance: "32 km", duration: "1h 45m", date: "2024-01-14", status: "Completed" },
-  { id: 3, from: "Rural Route", to: "Warehouse B", distance: "67 km", duration: "3h 15m", date: "2024-01-13", status: "Completed" },
-  { id: 4, from: "Farm District", to: "City Center", distance: "28 km", duration: "1h 20m", date: "2024-01-12", status: "Completed" },
-  { id: 5, from: "Port Area", to: "Rural Route", distance: "54 km", duration: "2h 45m", date: "2024-01-11", status: "Completed" },
+export const mockTrackingMessages: TrackingMessage[] = [
+  {
+    id: '1',
+    user: 'System',
+    message: '📦 Location update for Rice Shipment - 50 tons',
+    timestamp: new Date(Date.now() - 10 * 60 * 1000),
+    type: 'status'
+  },
+  {
+    id: '2',
+    user: 'Juan Dela Cruz',
+    message: 'Traffic delay on highway, ETA updated',
+    timestamp: new Date(Date.now() - 5 * 60 * 1000),
+    type: 'message'
+  },
+  {
+    id: '3',
+    user: 'System',
+    message: '⚠️ Delay Alert reported for Coconut Oil shipment',
+    timestamp: new Date(Date.now() - 2 * 60 * 1000),
+    type: 'alert'
+  }
 ];
 
 export const businessAnalytics = {
-  totalRevenue: 245000,
+  totalRevenue: 2450000,
+  monthlyGrowth: 12.5,
   totalBookings: 156,
-  activeVehicles: 12,
-  completedTrips: 89,
-  monthlyGrowth: 15.2,
-  customerSatisfaction: 4.8
+  activeVehicles: 24
 };
 
+export const vehicles = [
+  { id: 1, type: 'Truck', status: 'Available', capacity: '10 tons' },
+  { id: 2, type: 'Van', status: 'In Transit', capacity: '2 tons' },
+  { id: 3, type: 'Truck', status: 'Available', capacity: '15 tons' },
+  { id: 4, type: 'Van', status: 'Maintenance', capacity: '3 tons' },
+  { id: 5, type: 'Truck', status: 'In Transit', capacity: '12 tons' },
+  { id: 6, type: 'Van', status: 'Available', capacity: '2.5 tons' }
+];
+
 export const driverAnalytics = {
-  totalTrips: 45,
-  totalDistance: 2340,
-  totalEarnings: 45600,
-  avgRating: 4.7,
-  fuelEfficiency: 12.5,
-  onTimeDelivery: 94
+  totalTrips: 142,
+  totalDistance: 8450,
+  totalEarnings: 125000
 };
+
+export const driverRoutes = [
+  {
+    id: 1,
+    from: 'Davao City',
+    to: 'Tagum City',
+    distance: '65 km',
+    duration: '1h 30m',
+    status: 'Completed',
+    date: '2024-01-15'
+  },
+  {
+    id: 2,
+    from: 'Panabo City',
+    to: 'Digos City',
+    distance: '85 km',
+    duration: '2h 15m',
+    status: 'Completed',
+    date: '2024-01-14'
+  },
+  {
+    id: 3,
+    from: 'Mati City',
+    to: 'General Santos',
+    distance: '120 km',
+    duration: '3h 45m',
+    status: 'Completed',
+    date: '2024-01-13'
+  }
+];
+
+export const commodities = [
+  {
+    id: 1,
+    title: 'Rice Transport - Urgent',
+    commodity: 'Premium Rice',
+    from: 'Davao City',
+    to: 'Tagum City',
+    weight: '50 tons',
+    budget: '₱25,000',
+    deadline: 'Jan 20, 2024',
+    contact: 'Juan Santos',
+    phone: '+63 912 345 6789',
+    urgency: 'High'
+  },
+  {
+    id: 2,
+    title: 'Banana Export Delivery',
+    commodity: 'Fresh Bananas',
+    from: 'Panabo City',
+    to: 'Digos City',
+    weight: '30 tons',
+    budget: '₱18,000',
+    deadline: 'Jan 25, 2024',
+    contact: 'Maria Cruz',
+    phone: '+63 923 456 7890',
+    urgency: 'Medium'
+  },
+  {
+    id: 3,
+    title: 'Coconut Oil Transport',
+    commodity: 'Virgin Coconut Oil',
+    from: 'Mati City',
+    to: 'General Santos',
+    weight: '15 tons',
+    budget: '₱12,000',
+    deadline: 'Feb 1, 2024',
+    contact: 'Pedro Reyes',
+    phone: '+63 934 567 8901',
+    urgency: 'Low'
+  },
+  {
+    id: 4,
+    title: 'Durian Fruit Delivery',
+    commodity: 'Fresh Durian',
+    from: 'Davao City',
+    to: 'Koronadal City',
+    weight: '20 tons',
+    budget: '₱22,000',
+    deadline: 'Jan 18, 2024',
+    contact: 'Ana Lopez',
+    phone: '+63 945 678 9012',
+    urgency: 'High'
+  },
+  {
+    id: 5,
+    title: 'Coffee Bean Transport',
+    commodity: 'Arabica Coffee Beans',
+    from: 'Bukidnon',
+    to: 'Davao City',
+    weight: '10 tons',
+    budget: '₱15,000',
+    deadline: 'Jan 30, 2024',
+    contact: 'Roberto Garcia',
+    phone: '+63 956 789 0123',
+    urgency: 'Medium'
+  },
+  {
+    id: 6,
+    title: 'Pineapple Delivery',
+    commodity: 'Sweet Pineapples',
+    from: 'Bukidnon',
+    to: 'Cagayan de Oro',
+    weight: '25 tons',
+    budget: '₱20,000',
+    deadline: 'Feb 5, 2024',
+    contact: 'Carmen Dela Cruz',
+    phone: '+63 967 890 1234',
+    urgency: 'Low'
+  }
+];

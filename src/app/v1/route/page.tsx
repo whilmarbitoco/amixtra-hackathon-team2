@@ -46,6 +46,7 @@ export default function RoutePage() {
   const [showStartSuggestions, setShowStartSuggestions] = useState(false);
   const [showFinishSuggestions, setShowFinishSuggestions] = useState(false);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState(0);
+  const [isRouteLocked, setIsRouteLocked] = useState(false);
   
   // New state for enhanced features
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -124,10 +125,7 @@ export default function RoutePage() {
     };
   }, []);
 
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+
 
   const handleStartInputChange = (value: string) => {
     setStart(value);
@@ -182,6 +180,7 @@ export default function RoutePage() {
     setError('');
     setRoute(null);
     setSelectedRouteIndex(0);
+    setIsRouteLocked(false);
     
     try {
       // Geocode addresses to coordinates
@@ -293,6 +292,27 @@ export default function RoutePage() {
     return null;
   };
 
+  const getElevationData = async (coordinates: [number, number][]): Promise<number[]> => {
+    try {
+      const locations = coordinates.map(([lat, lng]) => `${lat},${lng}`).join('|');
+      const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${locations}`);
+      const data = await response.json();
+      return data.results.map((result: any) => result.elevation);
+    } catch (error) {
+      console.error('Elevation API error:', error);
+      return coordinates.map(() => 0);
+    }
+  };
+
+  const calculateTerrainScore = (elevations: number[]): number => {
+    if (elevations.length < 2) return 0;
+    let totalElevationChange = 0;
+    for (let i = 1; i < elevations.length; i++) {
+      totalElevationChange += Math.abs(elevations[i] - elevations[i - 1]);
+    }
+    return totalElevationChange;
+  };
+
   const calculateRoute = async (start: [number, number], finish: [number, number]): Promise<RouteData | null> => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_TOMTOM_API_KEY || 'demo_key';
@@ -304,23 +324,36 @@ export default function RoutePage() {
       const data = await response.json();
       
       if (data.routes && data.routes.length > 0) {
-        const sortedRoutes = data.routes.sort((a: any, b: any) => 
-          a.summary.travelTimeInSeconds - b.summary.travelTimeInSeconds
+        const routesWithTerrain = await Promise.all(
+          data.routes.map(async (route: any) => {
+            const coordinates = route.legs[0].points.map((point: any) => [point.latitude, point.longitude] as [number, number]);
+            const elevations = await getElevationData(coordinates.slice(0, 10)); // Sample points for performance
+            const terrainScore = calculateTerrainScore(elevations);
+            
+            return {
+              geometry: {
+                coordinates: route.legs[0].points.map((point: any) => [point.longitude, point.latitude])
+              },
+              summary: {
+                distance: route.summary.lengthInMeters,
+                duration: route.summary.travelTimeInSeconds,
+                trafficDelay: route.summary.trafficDelayInSeconds || 0,
+                noTrafficDuration: route.summary.noTrafficTravelTimeInSeconds,
+                terrainScore,
+                elevationGain: Math.max(...elevations) - Math.min(...elevations)
+              }
+            };
+          })
         );
         
-        return {
-          routes: sortedRoutes.map((route: any) => ({
-            geometry: {
-              coordinates: route.legs[0].points.map((point: any) => [point.longitude, point.latitude])
-            },
-            summary: {
-              distance: route.summary.lengthInMeters,
-              duration: route.summary.travelTimeInSeconds,
-              trafficDelay: route.summary.trafficDelayInSeconds || 0,
-              noTrafficDuration: route.summary.noTrafficTravelTimeInSeconds
-            }
-          }))
-        };
+        // Sort by combined score: time + terrain difficulty
+        const sortedRoutes = routesWithTerrain.sort((a: any, b: any) => {
+          const scoreA = a.summary.travelTimeInSeconds + (a.summary.terrainScore * 0.1);
+          const scoreB = b.summary.travelTimeInSeconds + (b.summary.terrainScore * 0.1);
+          return scoreA - scoreB;
+        });
+        
+        return { routes: sortedRoutes };
       }
     } catch (error) {
       console.error('TomTom routing error:', error);
@@ -353,9 +386,14 @@ export default function RoutePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Route Planner</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="text-black py-6 px-4 mb-2">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl font-bold mb-2">Smart Route Navigator</h1>
+          <p className="text-black/90">Plan your journey with AI-optimized routes that adapt to real-time conditions</p>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4">
         
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Left Sidebar - Route History & Current Location */}
@@ -385,21 +423,44 @@ export default function RoutePage() {
               </h3>
               {routeHistory.length > 0 ? (
                 <div className="space-y-3">
-                  {routeHistory.map((route) => (
-                    <div key={route.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
-                         onClick={() => { 
-                           setStart(route.from); 
-                           setFinish(route.to);
-                           setTimeout(() => handleRouteCalculation(), 100);
-                         }}>
-                      <div className="text-sm font-medium text-gray-900 mb-1">
-                        {route.from.split(',')[0]} → {route.to.split(',')[0]}
+                  {(() => {
+                    const groupedRoutes = routeHistory.reduce((acc, route) => {
+                      const key = `${route.from.split(',')[0]}-${route.to.split(',')[0]}`;
+                      if (!acc[key]) {
+                        acc[key] = { ...route, count: 1 };
+                      } else {
+                        acc[key].count++;
+                        if (route.date > acc[key].date) {
+                          acc[key] = { ...route, count: acc[key].count };
+                        }
+                      }
+                      return acc;
+                    }, {} as Record<string, RouteHistory & { count: number }>);
+                    
+                    return Object.values(groupedRoutes).map((route) => (
+                      <div key={route.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 cursor-pointer"
+                           onClick={() => { 
+                             setStart(route.from); 
+                             setFinish(route.to);
+                             setTimeout(() => handleRouteCalculation(), 100);
+                           }}>
+                        <div className="flex justify-between items-start mb-1">
+                          <div className="text-sm font-medium text-gray-900">
+                            {route.from.split(',')[0]} → {route.to.split(',')[0]}
+                          </div>
+                          {route.count > 1 && (
+                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                              {route.count}x
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {route.date?.toLocaleDateString()} • {Math.round(route.duration / 60)}min
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        {route.date?.toLocaleDateString()} • {Math.round(route.duration / 60)}min
-                      </div>
-                    </div>
-                  ))}
+                    ));
+                  })()
+                  }
                 </div>
               ) : (
                 <p className="text-sm text-gray-500">No recent routes</p>
@@ -421,15 +482,15 @@ export default function RoutePage() {
                     onChange={(e) => handleStartInputChange(e.target.value)}
                     onFocus={() => start.length >= 2 && setShowStartSuggestions(true)}
                     placeholder="Enter start address in Davao region"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-gray-900 placeholder-gray-500"
                   />
                   {showStartSuggestions && startSuggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                       {startSuggestions.map((suggestion, index) => (
                         <div
                           key={index}
                           onClick={() => selectStartSuggestion(suggestion)}
-                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                          className="z-[100] px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 text-gray-800 hover:text-blue-800"
                         >
                           {suggestion.display_name}
                         </div>
@@ -448,15 +509,15 @@ export default function RoutePage() {
                     onChange={(e) => handleFinishInputChange(e.target.value)}
                     onFocus={() => finish.length >= 2 && setShowFinishSuggestions(true)}
                     placeholder="Enter destination in Davao region"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white text-gray-900 placeholder-gray-500"
                   />
                   {showFinishSuggestions && finishSuggestions.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
                       {finishSuggestions.map((suggestion, index) => (
                         <div
                           key={index}
                           onClick={() => selectFinishSuggestion(suggestion)}
-                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm border-b border-gray-100 last:border-b-0"
+                          className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm border-b border-gray-100 last:border-b-0 text-gray-800 hover:text-blue-800"
                         >
                           {suggestion.display_name}
                         </div>
@@ -468,7 +529,7 @@ export default function RoutePage() {
                 <button
                   onClick={handleRouteCalculation}
                   disabled={!start || !finish || loading}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-6 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {loading ? (
                     <>
@@ -489,11 +550,17 @@ export default function RoutePage() {
             )}
 
             <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="p-3 bg-blue-50 border-b border-blue-200">
+                <div className="flex items-center gap-2 text-blue-700 text-sm">
+                  <span className="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">!</span>
+                  <span>AI-powered routing with terrain, traffic, and weather awareness.</span>
+                </div>
+              </div>
               <MapComponent route={route} selectedRouteIndex={selectedRouteIndex} userLocation={userLocation} />
               {route && route.routes && route.routes.length > 0 && (
                 <div className="p-4 bg-gray-50 border-t">
                   <h3 className="font-semibold text-gray-900 mb-3">Route Options</h3>
-                  <div className="space-y-3">
+                  <div className="overflow-y-auto space-y-3 pr-2">
                     {route.routes.map((routeOption, index: number) => {
                       const isSelected = index === selectedRouteIndex;
                       const trafficDelay = routeOption.summary.trafficDelay || 0;
@@ -502,14 +569,18 @@ export default function RoutePage() {
                       return (
                         <div
                           key={index}
-                          onClick={() => setSelectedRouteIndex(index)}
-                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                            isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                          onClick={() => !isRouteLocked && setSelectedRouteIndex(index)}
+                          className={`p-3 rounded-lg border transition-colors ${
+                            isSelected ? 'border-emerald-500 bg-emerald-50 shadow-md' : 'border-gray-300 hover:border-emerald-300 bg-white hover:bg-emerald-50'
+                          } ${
+                            isRouteLocked ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                           }`}
                         >
                           <div className="flex justify-between items-start mb-2">
                             <div className="flex items-center gap-2">
-                              <span className="font-medium text-sm">
+                              <span className={`font-medium text-sm ${
+                                isSelected ? 'text-emerald-800' : 'text-gray-800'
+                              }`}>
                                 Route {index + 1} {index === 0 ? '(Recommended)' : ''}
                               </span>
                               {hasTraffic && (
@@ -522,16 +593,22 @@ export default function RoutePage() {
                           <div className="grid grid-cols-3 gap-4 text-sm">
                             <div>
                               <span className="text-gray-600">Distance: </span>
-                              <span className="font-medium">{(routeOption.summary.distance / 1000).toFixed(1)} km</span>
+                              <span className={`font-medium ${
+                                isSelected ? 'text-emerald-800' : 'text-gray-800'
+                              }`}>{(routeOption.summary.distance / 1000).toFixed(1)} km</span>
                             </div>
                             <div>
                               <span className="text-gray-600">Duration: </span>
-                              <span className="font-medium">{Math.round(routeOption.summary.duration / 60)} min</span>
+                              <span className={`font-medium ${
+                                isSelected ? 'text-emerald-800' : 'text-gray-800'
+                              }`}>{Math.round(routeOption.summary.duration / 60)} min</span>
                             </div>
                             <div>
-                              <span className="text-gray-600">Traffic Delay: </span>
-                              <span className={`font-medium ${hasTraffic ? 'text-red-600' : 'text-green-600'}`}>
-                                {trafficDelay > 0 ? `+${Math.round(trafficDelay / 60)} min` : 'None'}
+                              <span className="text-gray-600">Terrain: </span>
+                              <span className={`font-medium ${
+                                (routeOption.summary as any).elevationGain > 100 ? 'text-orange-600' : 'text-green-600'
+                              }`}>
+                                {(routeOption.summary as any).elevationGain ? `${Math.round((routeOption.summary as any).elevationGain)}m gain` : 'Flat'}
                               </span>
                             </div>
                           </div>
@@ -539,6 +616,30 @@ export default function RoutePage() {
                       );
                     })}
                   </div>
+                  {route && route.routes && route.routes.length > 0 && (
+                    <div className="p-4 border-t flex gap-3">
+                      {!isRouteLocked ? (
+                        <button
+                          onClick={() => setIsRouteLocked(true)}
+                          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                        >
+                           Lock Route {selectedRouteIndex + 1}
+                        </button>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2 text-green-700 font-medium">
+                             Route {selectedRouteIndex + 1} Locked
+                          </div>
+                          <button
+                            onClick={() => setIsRouteLocked(false)}
+                            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                          >
+                            Cancel Lock
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
