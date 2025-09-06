@@ -295,6 +295,27 @@ export default function RoutePage() {
     return null;
   };
 
+  const getElevationData = async (coordinates: [number, number][]): Promise<number[]> => {
+    try {
+      const locations = coordinates.map(([lat, lng]) => `${lat},${lng}`).join('|');
+      const response = await fetch(`https://api.open-elevation.com/api/v1/lookup?locations=${locations}`);
+      const data = await response.json();
+      return data.results.map((result: any) => result.elevation);
+    } catch (error) {
+      console.error('Elevation API error:', error);
+      return coordinates.map(() => 0);
+    }
+  };
+
+  const calculateTerrainScore = (elevations: number[]): number => {
+    if (elevations.length < 2) return 0;
+    let totalElevationChange = 0;
+    for (let i = 1; i < elevations.length; i++) {
+      totalElevationChange += Math.abs(elevations[i] - elevations[i - 1]);
+    }
+    return totalElevationChange;
+  };
+
   const calculateRoute = async (start: [number, number], finish: [number, number]): Promise<RouteData | null> => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_TOMTOM_API_KEY || 'demo_key';
@@ -306,23 +327,36 @@ export default function RoutePage() {
       const data = await response.json();
       
       if (data.routes && data.routes.length > 0) {
-        const sortedRoutes = data.routes.sort((a: any, b: any) => 
-          a.summary.travelTimeInSeconds - b.summary.travelTimeInSeconds
+        const routesWithTerrain = await Promise.all(
+          data.routes.map(async (route: any) => {
+            const coordinates = route.legs[0].points.map((point: any) => [point.latitude, point.longitude] as [number, number]);
+            const elevations = await getElevationData(coordinates.slice(0, 10)); // Sample points for performance
+            const terrainScore = calculateTerrainScore(elevations);
+            
+            return {
+              geometry: {
+                coordinates: route.legs[0].points.map((point: any) => [point.longitude, point.latitude])
+              },
+              summary: {
+                distance: route.summary.lengthInMeters,
+                duration: route.summary.travelTimeInSeconds,
+                trafficDelay: route.summary.trafficDelayInSeconds || 0,
+                noTrafficDuration: route.summary.noTrafficTravelTimeInSeconds,
+                terrainScore,
+                elevationGain: Math.max(...elevations) - Math.min(...elevations)
+              }
+            };
+          })
         );
         
-        return {
-          routes: sortedRoutes.map((route: any) => ({
-            geometry: {
-              coordinates: route.legs[0].points.map((point: any) => [point.longitude, point.latitude])
-            },
-            summary: {
-              distance: route.summary.lengthInMeters,
-              duration: route.summary.travelTimeInSeconds,
-              trafficDelay: route.summary.trafficDelayInSeconds || 0,
-              noTrafficDuration: route.summary.noTrafficTravelTimeInSeconds
-            }
-          }))
-        };
+        // Sort by combined score: time + terrain difficulty
+        const sortedRoutes = routesWithTerrain.sort((a: any, b: any) => {
+          const scoreA = a.summary.travelTimeInSeconds + (a.summary.terrainScore * 0.1);
+          const scoreB = b.summary.travelTimeInSeconds + (b.summary.terrainScore * 0.1);
+          return scoreA - scoreB;
+        });
+        
+        return { routes: sortedRoutes };
       }
     } catch (error) {
       console.error('TomTom routing error:', error);
@@ -522,14 +556,14 @@ export default function RoutePage() {
               <div className="p-3 bg-blue-50 border-b border-blue-200">
                 <div className="flex items-center gap-2 text-blue-700 text-sm">
                   <span className="w-4 h-4 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">!</span>
-                  <span>AI-powered route optimization based on real-time traffic and weather conditions</span>
+                  <span>AI-powered routing with terrain, traffic, and weather awareness.</span>
                 </div>
               </div>
               <MapComponent route={route} selectedRouteIndex={selectedRouteIndex} userLocation={userLocation} />
               {route && route.routes && route.routes.length > 0 && (
                 <div className="p-4 bg-gray-50 border-t">
                   <h3 className="font-semibold text-gray-900 mb-3">Route Options</h3>
-                  <div className="max-h-80 overflow-y-auto space-y-3 pr-2">
+                  <div className="overflow-y-auto space-y-3 pr-2">
                     {route.routes.map((routeOption, index: number) => {
                       const isSelected = index === selectedRouteIndex;
                       const trafficDelay = routeOption.summary.trafficDelay || 0;
@@ -573,9 +607,11 @@ export default function RoutePage() {
                               }`}>{Math.round(routeOption.summary.duration / 60)} min</span>
                             </div>
                             <div>
-                              <span className="text-gray-600">Traffic Delay: </span>
-                              <span className={`font-medium ${hasTraffic ? 'text-red-600' : 'text-green-600'}`}>
-                                {trafficDelay > 0 ? `+${Math.round(trafficDelay / 60)} min` : 'None'}
+                              <span className="text-gray-600">Terrain: </span>
+                              <span className={`font-medium ${
+                                (routeOption.summary as any).elevationGain > 100 ? 'text-orange-600' : 'text-green-600'
+                              }`}>
+                                {(routeOption.summary as any).elevationGain ? `${Math.round((routeOption.summary as any).elevationGain)}m gain` : 'Flat'}
                               </span>
                             </div>
                           </div>
