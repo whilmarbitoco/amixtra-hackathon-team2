@@ -236,3 +236,39 @@ export const commodities = [
     urgency: 'Low'
   }
 ];
+
+export const sampleBookings = [
+  {
+    id: '1',
+    distributorName: 'ABC Distribution',
+    distributorEmail: 'contact@abc.com',
+    status: 'Confirmed',
+    vehicleType: 'Truck Driver',
+    capacity: '10 tons',
+    bookingDate: new Date().toISOString()
+  },
+  {
+    id: '2',
+    distributorName: 'XYZ Logistics',
+    distributorEmail: 'info@xyz.com',
+    status: 'Pending',
+    vehicleType: 'Van Driver',
+    capacity: '5 tons',
+    bookingDate: new Date().toISOString()
+  }
+];
+
+export const mockTransportedCommodities = [
+  { name: "Rice", quantity: "50 sacks", weight: "2,500 kg" },
+  { name: "Corn", quantity: "30 sacks", weight: "1,500 kg" },
+  { name: "Vegetables", quantity: "20 boxes", weight: "800 kg" }
+];
+
+export const chatMessages = {
+  driver: [
+    {id: '1', text: 'Hello! I\'m your driving assistant. How can I help you today?', isBot: true}
+  ],
+  business: [
+    {id: '1', text: 'Hello! I\'m your shipping assistant. I can help you find drivers, track shipments, and manage your logistics.', isBot: true}
+  ]
+};

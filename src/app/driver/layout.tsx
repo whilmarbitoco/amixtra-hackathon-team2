@@ -45,8 +45,8 @@ export default function DriverLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
       <div className="w-64 bg-white shadow-lg">
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900">Driver Panel</h2>
+        <div className="p-6 flex items-center justify-center">
+          <img src="/gb-logo.png" alt="Logo" className="w-6/12" />
         </div>
         <nav className="mt-6">
           {navItems.map((item, index) => {

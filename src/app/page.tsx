@@ -7,11 +7,13 @@ export default function Home() {
       <div className="bg-gradient-to-br from-emerald-50 via-white to-blue-50">
 
      <PageWrapper>
-       <nav className="max-w-7xl mx-auto p-4">
-        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+       <nav className="max-w-7xl mx-auto">
+        <div className="container mx-auto px-4 flex justify-between items-center">
           <Link href="/" className="text-2xl font-bold text-emerald-600">
-            Green Bridge
-          </Link>
+            <div className="p-6 flex items-center justify-center">
+              <img src="/gb-logo.png" alt="Logo" className="w-4/12" />
+            </div>          
+        </Link>
 
           <div className="space-x-6">
             <Link href="/login" className="text-gray-700 hover:text-emerald-600 font-medium">

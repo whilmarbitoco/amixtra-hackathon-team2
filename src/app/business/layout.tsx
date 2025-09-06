@@ -35,16 +35,16 @@ export default function BusinessLayout({
   ];
 
   if (!user) return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
       <div className="w-64 bg-white shadow-lg">
-        <div className="p-6">
-          <h2 className="text-xl font-bold text-gray-900">Business Panel</h2>
+        <div className="p-6 flex items-center justify-center">
+          <img src="/gb-logo.png" alt="Logo" className="h-8 w-auto" />
         </div>
         <nav className="mt-6">
           {navItems.map((item, index) => {
@@ -55,7 +55,7 @@ export default function BusinessLayout({
                 href={item.href} 
                 className={`flex items-center gap-3 px-6 py-3 transition-colors ${
                   isActive 
-                    ? 'bg-emerald-100 text-emerald-700 border-r-2 border-emerald-600' 
+                    ? 'bg-blue-100 text-blue-700 border-r-2 border-blue-600' 
                     : 'text-gray-600 hover:bg-gray-50'
                 }`}
               >

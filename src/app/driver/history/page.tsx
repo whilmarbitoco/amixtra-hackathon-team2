@@ -11,7 +11,7 @@ import {
   X,
   Package
 } from "lucide-react";
-import { driverRoutes } from "@/constants";
+import { driverRoutes, mockTransportedCommodities } from "@/constants";
 
 export default function DriverHistory() {
   const [filter, setFilter] = useState("all");
@@ -22,11 +22,7 @@ export default function DriverHistory() {
     return route.status.toLowerCase() === filter;
   });
 
-  const mockCommodities = [
-    { name: "Rice", quantity: "50 sacks", weight: "2,500 kg" },
-    { name: "Corn", quantity: "30 sacks", weight: "1,500 kg" },
-    { name: "Vegetables", quantity: "20 boxes", weight: "800 kg" }
-  ];
+
 
   return (
     <div>
@@ -165,7 +161,7 @@ export default function DriverHistory() {
                   Transported Commodities
                 </h4>
                 <div className="space-y-3">
-                  {mockCommodities.map((commodity, index) => (
+                  {mockTransportedCommodities.map((commodity, index) => (
                     <div key={index} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex justify-between items-center">
                         <span className="font-medium text-gray-900">{commodity.name}</span>

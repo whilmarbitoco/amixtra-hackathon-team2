@@ -6,17 +6,22 @@ import {
   Truck, 
   Calendar, 
   Bot,
-  Send
+  Send,
+  MessageCircle,
+  Minus
 } from "lucide-react";
-import { businessAnalytics } from "@/constants";
+import { useRouter } from "next/navigation";
+import { businessAnalytics, sampleBookings } from "@/constants";
 
 export default function BusinessDashboard() {
+  const router = useRouter();
   const [bookings, setBookings] = useState<any[]>([]);
   const [chatMessages, setChatMessages] = useState<{id: string, text: string, isBot: boolean}[]>([
     {id: '1', text: 'Hello! I\'m your shipping assistant. I can help you find drivers, track shipments, and manage your logistics.', isBot: true}
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return;
@@ -60,26 +65,6 @@ export default function BusinessDashboard() {
     const storedBookings = JSON.parse(localStorage.getItem("bookings") || "[]");
     // Add sample data if no bookings exist
     if (storedBookings.length === 0) {
-      const sampleBookings = [
-        {
-          id: '1',
-          distributorName: 'ABC Distribution',
-          distributorEmail: 'contact@abc.com',
-          status: 'Confirmed',
-          vehicleType: 'Truck Driver',
-          capacity: '10 tons',
-          bookingDate: new Date().toISOString()
-        },
-        {
-          id: '2',
-          distributorName: 'XYZ Logistics',
-          distributorEmail: 'info@xyz.com',
-          status: 'Pending',
-          vehicleType: 'Van Driver',
-          capacity: '5 tons',
-          bookingDate: new Date().toISOString()
-        }
-      ];
       setBookings(sampleBookings);
     } else {
       setBookings(storedBookings);
@@ -109,11 +94,11 @@ export default function BusinessDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Total Shipments</p>
-              <p className="text-3xl font-bold text-emerald-600">{bookings.length}</p>
-              <p className="text-sm text-emerald-600 mt-1">All time</p>
+              <p className="text-3xl font-bold text-green-600">{bookings.length}</p>
+              <p className="text-sm text-green-600 mt-1">All time</p>
             </div>
-            <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
-              <Truck className="h-6 w-6 text-emerald-600" />
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+              <Truck className="h-6 w-6 text-green-600" />
             </div>
           </div>
         </div>
@@ -122,35 +107,78 @@ export default function BusinessDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-gray-600 text-sm">Available Drivers</p>
-              <p className="text-3xl font-bold text-orange-600">{businessAnalytics.activeVehicles}</p>
-              <p className="text-sm text-orange-600 mt-1">Ready to ship</p>
+              <p className="text-3xl font-bold text-yellow-600">{businessAnalytics.activeVehicles}</p>
+              <p className="text-sm text-yellow-600 mt-1">Ready to ship</p>
             </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
-              <Users className="h-6 w-6 text-orange-600" />
+            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Users className="h-6 w-6 text-yellow-600" />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent Shipments */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Recent Shipments</h2>
-              <button className="text-emerald-600 hover:text-emerald-700 font-medium">Create New</button>
+ {/* Commodities Tracker CTA */}
+      <div className="mb-8">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-8 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-12 -translate-x-12"></div>
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                <Truck className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold mb-2">Track Your Commodities</h3>
+                <p className="text-blue-100 mb-4">Real-time tracking and monitoring of all shipments</p>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-1">
+                    <Calendar className="h-4 w-4" />
+                    <span>Live Updates</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>GPS Tracking</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Bot className="h-4 w-4" />
+                    <span>Route Optimization</span>
+                  </div>
+                </div>
+              </div>
             </div>
+            
+            <button
+              onClick={() => router.push('/v1/track')}
+              className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2 group"
+            >
+              Start Tracking
+              <Truck className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Shipments - Full Width */}
+      <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-gray-900">Recent Shipments</h2>
+        </div>
             
             {recentBookings.length > 0 ? (
               <div className="space-y-4">
                 {recentBookings.map((booking) => (
-                  <div key={booking.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                  <div 
+                    key={booking.id} 
+                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => router.push('/business/shipments')}
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <h3 className="font-semibold text-gray-900">Shipment to {booking.distributorName}</h3>
                         <p className="text-sm text-gray-600">{booking.distributorEmail}</p>
                       </div>
-                      <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium">
+                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
                         {booking.status}
                       </span>
                     </div>
@@ -168,95 +196,153 @@ export default function BusinessDashboard() {
               <div className="text-center py-8 text-gray-500">
                 <Truck className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                 <p>No recent shipments</p>
-                <button className="mt-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
-                  Create First Shipment
+              </div>
+            )}
+      </div>
+
+      {/* AI Performance Summary */}
+      {bookings.length > 0 && (
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Bot className="h-6 w-6 text-blue-600" />
+              <h3 className="text-xl font-semibold text-gray-900">AI Performance Analysis</h3>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-green-600" />
+                <span className="text-sm font-medium text-green-700">Data Optimized</span>
+              </div>
+              <div className="text-xs text-gray-500">Last 30 days</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Success Rate</p>
+                <p className="text-lg font-semibold text-gray-900">{Math.round((bookings.filter(b => b.status === 'Confirmed').length / bookings.length) * 100)}%</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <Truck className="h-6 w-6 text-green-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total Capacity Moved</p>
+                <p className="text-lg font-semibold text-gray-900">{bookings.reduce((sum, b) => sum + (parseInt(b.capacity.split(' ')[0]) || 0), 0)} tons</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <Users className="h-6 w-6 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Weekly Average</p>
+                <p className="text-lg font-semibold text-gray-900">{Math.round(bookings.length / 30 * 7)} shipments</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="flex flex-wrap items-center gap-6">
+              <div className="text-sm text-gray-600">
+                <span className="font-medium text-gray-900">Key Insights:</span>
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">
+                  {bookings.filter(b => b.status === 'Confirmed').length} Completed
+                </span>
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
+                  {businessAnalytics.totalBookings} Active
+                </span>
+              </div>
+              
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-sm text-gray-600">AI Confidence:</span>
+                <span className="text-sm font-medium text-gray-900">94%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating AI Chatbot */}
+      {isMinimized ? (
+        <div 
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 rounded-full shadow-2xl border border-gray-200 z-50 cursor-pointer hover:bg-blue-700 transition-colors flex items-center justify-center"
+          onClick={() => setIsMinimized(false)}
+        >
+          <MessageCircle className="h-6 w-6 text-white" />
+        </div>
+      ) : (
+        <div 
+          className="fixed bottom-6 right-6 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 select-none"
+        >
+          <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-blue-600" />
+              <h3 className="font-semibold text-gray-900">Shipping Assistant</h3>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={() => setIsMinimized(true)}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                >
+                  <Minus className="h-4 w-4 text-gray-600" />
                 </button>
+              </div>
+            </div>
+          </div>
+          
+          <div className="h-80 overflow-y-auto p-4 space-y-2">
+            {chatMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                  msg.isBot 
+                    ? 'bg-gray-100 text-gray-800' 
+                    : 'bg-blue-600 text-white'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm">
+                  Thinking...
+                </div>
               </div>
             )}
           </div>
           
-          {/* AI Performance Summary */}
-          {bookings.length > 0 && (
-            <div className="bg-white rounded-xl shadow-lg p-6 mt-6">
-              <div className="flex items-center gap-2 mb-6">
-                <Bot className="h-5 w-5 text-emerald-600" />
-                <h2 className="text-xl font-bold text-gray-900">AI Performance Summary</h2>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-emerald-600">{Math.round((bookings.filter(b => b.status === 'Confirmed').length / bookings.length) * 100)}%</p>
-                  <p className="text-sm text-gray-600">Success Rate</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">{bookings.reduce((sum, b) => sum + (parseInt(b.capacity.split(' ')[0]) || 0), 0)}</p>
-                  <p className="text-sm text-gray-600">Total Tons</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-orange-600">{Math.round(bookings.length / 30 * 7)}</p>
-                  <p className="text-sm text-gray-600">Avg/Week</p>
-                </div>
-              </div>
-              
-              <div className="bg-gradient-to-r from-emerald-50 to-blue-50 rounded-lg p-3">
-                <p className="text-sm text-gray-700 text-center">
-                  <span className="font-semibold">AI Insight:</span> Strong performance with {Math.round((bookings.filter(b => b.status === 'Confirmed').length / bookings.length) * 100)}% delivery success across {new Set(bookings.map(b => b.distributorName)).size} partners
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* AI Chatbot */}
-        <div>
-          <div className="bg-white rounded-xl shadow-lg p-6 h-[500px] flex flex-col">
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="h-6 w-6 text-emerald-600" />
-              <h2 className="text-xl font-bold text-gray-900">Shipping Assistant</h2>
-            </div>
-            
-            <div className="flex-1 overflow-y-auto space-y-3 mb-4">
-              {chatMessages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
-                  <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                    msg.isBot 
-                      ? 'bg-gray-100 text-gray-800' 
-                      : 'bg-emerald-600 text-white'
-                  }`}>
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm">
-                    Thinking...
-                  </div>
-                </div>
-              )}
-            </div>
-            
+          <div className="p-4 border-t border-gray-200">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    sendMessage();
+                  }
+                }}
                 placeholder="Ask about your business..."
-                disabled={loading}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50 text-black"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
               />
               <button
                 onClick={sendMessage}
                 disabled={loading || !inputMessage.trim()}
-                className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
