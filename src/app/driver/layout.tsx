@@ -33,7 +33,7 @@ export default function DriverLayout({
     { href: "/driver/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
     { href: "/driver/commodities", icon: <FileText className="h-5 w-5" />, label: "Browse Commodities" },
     { href: "/driver/vehicles", icon: <Truck className="h-5 w-5" />, label: "My Vehicles" },
-    { href: "/v1/route", icon: <Route className="h-5 w-5" />, label: "Route Planner" },
+    { href: "/driver/history", icon: <Route className="h-5 w-5" />, label: "Trip History" },
   ];
 
   if (!user) return (
