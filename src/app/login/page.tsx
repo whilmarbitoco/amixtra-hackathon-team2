@@ -22,10 +22,20 @@ export default function Login() {
       const users = JSON.parse(localStorage.getItem("users") || "[]");
       const user = users.find((u: any) => u.email === email && u.password === password);
       
-      if (user) {
+      if (user.role == "distributor") {
         localStorage.setItem("currentUser", JSON.stringify(user));
-        router.push("/dashboard");
-      } else {
+        router.push("/dashboard/business");
+
+      }
+      else if (user.role == "vehicle_owner") {
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        router.push("/dashboard/driver");
+      }
+      else if (user.role == "driver"){
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        router.push("/dashboard/driver");
+      } 
+      else {
         alert("Invalid credentials");
       }
     } else {
