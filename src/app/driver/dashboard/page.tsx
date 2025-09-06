@@ -14,9 +14,48 @@ import { driverRoutes, driverAnalytics } from "@/constants";
 
 export default function DriverDashboard() {
   const [chatMessages, setChatMessages] = useState<{id: string, text: string, isBot: boolean}[]>([
-    {id: '1', text: 'Hello! I\'m your AI assistant. How can I help you today?', isBot: true}
+    {id: '1', text: 'Hello! I\'m your driving assistant. How can I help you today?', isBot: true}
   ]);
   const [inputMessage, setInputMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const sendMessage = async () => {
+    if (!inputMessage.trim() || loading) return;
+
+    const userMessage = {id: Date.now().toString(), text: inputMessage, isBot: false};
+    setChatMessages(prev => [...prev, userMessage]);
+    setInputMessage('');
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: 'You are a helpful driving assistant. Provide concise advice about driving, traffic rules, vehicle maintenance, and road safety.' },
+            ...chatMessages.map(msg => ({ role: msg.isBot ? 'assistant' : 'user', content: msg.text })),
+            { role: 'user', content: inputMessage }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      const content = data.choices?.[0]?.message?.content || 'Sorry, I couldn\'t process that request.';
+      setChatMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(), 
+        text: content, 
+        isBot: true
+      }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(), 
+        text: 'Sorry, I encountered an error. Please try again.', 
+        isBot: true
+      }]);
+    }
+    setLoading(false);
+  };
 
   return (
     <>
@@ -113,6 +152,13 @@ export default function DriverDashboard() {
                   </div>
                 </div>
               ))}
+              {loading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm">
+                    Thinking...
+                  </div>
+                </div>
+              )}
             </div>
             
             <div className="flex gap-2">
@@ -120,33 +166,15 @@ export default function DriverDashboard() {
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    if (inputMessage.trim()) {
-                      setChatMessages(prev => [
-                        ...prev,
-                        {id: Date.now().toString(), text: inputMessage, isBot: false},
-                        {id: (Date.now() + 1).toString(), text: 'I understand your request. Let me help you with that!', isBot: true}
-                      ]);
-                      setInputMessage('');
-                    }
-                  }
-                }}
-                placeholder="Ask me anything..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Ask about driving..."
+                disabled={loading}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
               <button
-                onClick={() => {
-                  if (inputMessage.trim()) {
-                    setChatMessages(prev => [
-                      ...prev,
-                      {id: Date.now().toString(), text: inputMessage, isBot: false},
-                      {id: (Date.now() + 1).toString(), text: 'I understand your request. Let me help you with that!', isBot: true}
-                    ]);
-                    setInputMessage('');
-                  }
-                }}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                onClick={sendMessage}
+                disabled={loading || !inputMessage.trim()}
+                className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 <Send className="h-4 w-4" />
               </button>
