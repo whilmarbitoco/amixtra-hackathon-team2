@@ -31,11 +31,6 @@ export default function DriverLayout({
   const navItems = [
     { href: "/driver/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
     { href: "/driver/commodities", icon: <FileText className="h-5 w-5" />, label: "Browse Commodities" },
-    { href: "#", icon: <Route className="h-5 w-5" />, label: "My Routes" },
-    { href: "#", icon: <Truck className="h-5 w-5" />, label: "Vehicle Info" },
-    { href: "#", icon: <Fuel className="h-5 w-5" />, label: "Fuel Log" },
-    { href: "#", icon: <User className="h-5 w-5" />, label: "Profile" },
-    { href: "#", icon: <Settings className="h-5 w-5" />, label: "Settings" },
   ];
 
   if (!user) return (
