@@ -14,12 +14,12 @@ export default function Home() {
           </Link>
 
           <div className="space-x-6">
-            <Link href="/login" className="text-gray-700 hover:text-[#15B9CC] font-medium">
+            <Link href="/login" className="text-gray-700 hover:text-emerald-600 font-medium">
               Login
             </Link>
             <Link
               href="/signup"
-              className="bg-[#15B9CC] text-white text-center px-6 py-2.5 rounded-lg hover:bg-[#13a5b7] transition-all duration-300 font-medium"
+              className="bg-emerald-600 text-white text-center px-6 py-2.5 rounded-lg hover:bg-emerald-700 transition-all duration-300 font-medium"
             >
               Sign Up
             </Link>
@@ -32,13 +32,13 @@ export default function Home() {
         <div className="text-center mb-20">
           <div className="inline-flex items-center gap-2 bg-emerald-100 px-4 py-2 rounded-full mb-6">
             <span className="w-2 h-2 bg-emerald-600 rounded-full animate-pulse"></span>
-            <span className="text-emerald-700 font-medium">AI-Powered Logistics with Blockchain Security</span>
+            <span className="text-emerald-700 font-medium text-xs">AI-Powered Logistics with Blockchain Security</span>
           </div>
           <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
             Green Bridge
-            <span className="block text-4xl text-emerald-600 mt-2">Smart Contract Logistics Platform</span>
+            <span className="block text-3xl text-emerald-600 mt-2">Smart Contract Logistics Platform</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-md text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
             Connect businesses with trusted drivers using AI-powered matching and blockchain-secured smart contracts. 
             Safe, transparent, and automated escrow payments ensure protection for both parties.
           </p>
@@ -117,49 +117,49 @@ export default function Home() {
         {/* Features Section */}
         <div className="mb-20">
           <h2 className="text-4xl font-bold text-center text-gray-900 mb-4">Why Choose Green Bridge?</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <p className="text-center text-black mb-12 max-w-2xl mx-auto">
             The first logistics platform combining AI-powered matching with blockchain-secured smart contracts for complete transaction protection.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center p-6">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16  bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Lock className="w-8 h-8 text-emerald-600" />
               </div>
-              <h4 className="font-bold text-lg mb-2">Blockchain Security</h4>
+              <h4 className="font-bold text-lg mb-2 text-black/80">Blockchain Security</h4>
               <p className="text-gray-600 text-sm">Smart contracts ensure payments are secure and automatically released</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-blue-600" />
               </div>
-              <h4 className="font-bold text-lg mb-2">Escrow Protection</h4>
+              <h4 className="font-bold text-lg mb-2 text-black/80">Escrow Protection</h4>
               <p className="text-gray-600 text-sm">Funds held safely until delivery confirmation protects both parties</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Bot className="w-8 h-8 text-purple-600" />
               </div>
-              <h4 className="font-bold text-lg mb-2">AI Optimization</h4>
+              <h4 className="font-bold text-lg mb-2 text-black/80">AI Optimization</h4>
               <p className="text-gray-600 text-sm">Machine learning matches optimal routes and reliable drivers</p>
             </div>
             <div className="text-center p-6">
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Zap className="w-8 h-8 text-orange-600" />
               </div>
-              <h4 className="font-bold text-lg mb-2">Instant Settlements</h4>
+              <h4 className="font-bold text-lg mb-2 text-black/80">Instant Settlements</h4>
               <p className="text-gray-600 text-sm">Automated payment release upon GPS-confirmed delivery</p>
             </div>
           </div>
         </div>
 
         {/* CTA Section */}
-        <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-3xl p-12 text-center text-white">
+        <div className="bg-gradient-to-r from-emerald-400 to-emerald-600 rounded-3xl p-12 text-center text-white">
           <h2 className="text-4xl font-bold mb-4">Ready for Secure, AI-Powered Logistics?</h2>
           <p className="text-xl mb-8 opacity-90">Join businesses and drivers using blockchain-protected smart contracts</p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
               href="/login"
-              className="bg-white text-emerald-600 px-8 py-4 rounded-xl hover:bg-gray-100 transition-colors font-semibold"
+              className="bg-white text-emerald-600 px-8 text-center py-4 rounded-xl hover:bg-gray-100 transition-colors font-semibold"
             >
               Start Shipping Safely
             </Link>
