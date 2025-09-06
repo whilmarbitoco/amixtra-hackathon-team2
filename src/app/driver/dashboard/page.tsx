@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import React from "react";
 import { 
   Truck, 
   MapPin, 
@@ -11,7 +12,9 @@ import {
   Send,
   Route,
   Zap,
-  ArrowRight
+  ArrowRight,
+  Minus,
+  MessageCircle
 } from "lucide-react";
 import { driverRoutes, driverAnalytics } from "@/constants";
 import { useRouter } from "next/navigation";
@@ -23,11 +26,26 @@ export default function DriverDashboard() {
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(true);
+  const [showRoutePlannerPrompt, setShowRoutePlannerPrompt] = useState(false);
+  const [showDefaultRouteCTA, setShowDefaultRouteCTA] = useState(false);
+
+  const isTransportationRelated = (message: string) => {
+    const keywords = [
+      'route', 'navigation', 'directions', 'path', 'way', 'road', 'drive', 'trip', 'journey',
+      'destination', 'location', 'address', 'traffic', 'fastest', 'shortest', 'quickest',
+      'avoid', 'toll', 'highway', 'street', 'map', 'gps', 'navigate', 'travel', 'distance',
+      'time', 'eta', 'arrival', 'departure', 'fuel', 'gas', 'cost', 'efficient', 'optimize'
+    ];
+    return keywords.some(keyword => message.toLowerCase().includes(keyword));
+  };
 
   const sendMessage = async () => {
     if (!inputMessage.trim() || loading) return;
 
     const userMessage = {id: Date.now().toString(), text: inputMessage, isBot: false};
+    const isTransportQuestion = isTransportationRelated(inputMessage);
+    
     setChatMessages(prev => [...prev, userMessage]);
     setInputMessage('');
     setLoading(true);
@@ -47,11 +65,23 @@ export default function DriverDashboard() {
 
       const data = await response.json();
       const content = data.choices?.[0]?.message?.content || 'Sorry, I couldn\'t process that request.';
+      
       setChatMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(), 
         text: content, 
         isBot: true
       }]);
+
+      // Check if AI response or conversation context suggests transportation topics
+      const aiSuggestsTransport = content.toLowerCase().includes('route') || 
+                                 content.toLowerCase().includes('navigation') ||
+                                 content.toLowerCase().includes('drive') ||
+                                 content.toLowerCase().includes('traffic');
+      
+      if (isTransportQuestion || aiSuggestsTransport) {
+        setShowRoutePlannerPrompt(true);
+        setShowDefaultRouteCTA(true);
+      }
     } catch (error) {
       setChatMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(), 
@@ -145,69 +175,114 @@ export default function DriverDashboard() {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8 h-[calc(100vh-400px)]">
-        {/* Recent Routes */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-xl shadow-lg p-6 h-full flex flex-col">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Routes</h2>
-            <div className="flex-1 overflow-y-auto space-y-3">
-              {driverRoutes.map((route) => (
-                <div key={route.id} className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-blue-600" />
-                      <span className="font-semibold text-gray-900 text-sm">{route.from} → {route.to}</span>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
-                      {route.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <Navigation className="h-3 w-3" />
-                      {route.distance}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {route.duration}
-                    </div>
-                    <div>{route.date}</div>
-                  </div>
+      {/* Recent Routes - Full Width */}
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Routes</h2>
+        <div className="space-y-4">
+          {driverRoutes.map((route) => (
+            <div key={route.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-blue-600" />
+                  <span className="font-semibold text-gray-900">{route.from} → {route.to}</span>
                 </div>
-              ))}
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  {route.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-6 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <Navigation className="h-4 w-4" />
+                  {route.distance}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-4 w-4" />
+                  {route.duration}
+                </div>
+                <div>{route.date}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Floating AI Chatbot */}
+      {isMinimized ? (
+        <div 
+          className="fixed bottom-6 right-6 w-14 h-14 bg-blue-600 rounded-full shadow-2xl border border-gray-200 z-50 cursor-pointer hover:bg-blue-700 transition-colors flex items-center justify-center"
+          onClick={() => setIsMinimized(false)}
+        >
+          <MessageCircle className="h-6 w-6 text-white" />
+        </div>
+      ) : (
+        <div 
+          className="fixed bottom-6 right-6 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 select-none"
+        >
+          <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+            <div className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-blue-600" />
+              <h3 className="font-semibold text-gray-900">AI Assistant</h3>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  onClick={() => setIsMinimized(true)}
+                  className="p-1 hover:bg-gray-200 rounded transition-colors"
+                >
+                  <Minus className="h-4 w-4 text-gray-600" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* AI Chatbot */}
-        <div>
-          <div className="bg-white rounded-xl shadow-lg p-6 h-full flex flex-col">
-            <div className="flex items-center gap-2 mb-4">
-              <Bot className="h-5 w-5 text-blue-600" />
-              <h2 className="text-lg font-bold text-gray-900">AI Assistant</h2>
-            </div>
+          
+          <div className="h-80 overflow-y-auto p-4 space-y-2">
+            {chatMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
+                  msg.isBot 
+                    ? 'bg-gray-100 text-gray-800' 
+                    : 'bg-blue-600 text-white'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm">
+                  Thinking...
+                </div>
+              </div>
+            )}
             
-            <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-              {chatMessages.map((msg) => (
-                <div key={msg.id} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
-                  <div className={`max-w-xs px-3 py-2 rounded-lg text-xs ${
-                    msg.isBot 
-                      ? 'bg-gray-100 text-gray-800' 
-                      : 'bg-blue-600 text-white'
-                  }`}>
-                    {msg.text}
+            {showRoutePlannerPrompt && (
+              <div className="flex justify-start mt-2">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 max-w-xs">
+                  <p className="text-sm text-gray-700 mb-2">I noticed you're asking about transportation. Would you like me to open the route planner?</p>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        router.push('/v1/route');
+                        setShowRoutePlannerPrompt(false);
+                      }}
+                      className="flex items-center gap-1 bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700 transition-colors"
+                    >
+                      <Route className="h-3 w-3" />
+                      Yes, Open
+                    </button>
+                    <button
+                      onClick={() => setShowRoutePlannerPrompt(false)}
+                      className="bg-gray-200 text-gray-700 px-3 py-1 rounded text-xs hover:bg-gray-300 transition-colors"
+                    >
+                      No, Thanks
+                    </button>
                   </div>
                 </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm">
-                    Thinking...
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
             
+          
+          </div>
+          
+          <div className="p-4 border-t border-gray-200">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -215,30 +290,23 @@ export default function DriverDashboard() {
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
-                    if (inputMessage.trim()) {
-                      setChatMessages(prev => [
-                        ...prev,
-                        {id: Date.now().toString(), text: inputMessage, isBot: false},
-                        {id: (Date.now() + 1).toString(), text: 'I understand your request. Let me help you with that!', isBot: true}
-                      ]);
-                      setInputMessage('');
-                    }
+                    sendMessage();
                   }
                 }}
                 placeholder="Ask me anything..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
               />
               <button
                 onClick={sendMessage}
                 disabled={loading || !inputMessage.trim()}
                 className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                <Send className="h-3 w-3" />
+                <Send className="h-4 w-4" />
               </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
