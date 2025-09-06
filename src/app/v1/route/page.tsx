@@ -125,10 +125,7 @@ export default function RoutePage() {
     };
   }, []);
 
-  // Auto-scroll chat to bottom
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [chatMessages]);
+
 
   const handleStartInputChange = (value: string) => {
     setStart(value);
