@@ -4,9 +4,10 @@ export async function POST(request: NextRequest) {
   try {
     const { messages } = await request.json();
     
-    const url = `https://${process.env.AZURE_OPENAI_RESOURCE_NAME}.openai.azure.com/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2024-06-01`;
+    const url = `https://${process.env.AZURE_OPENAI_RESOURCE_NAME}.openai.azure.com/openai/deployments/${process.env.AZURE_OPENAI_MODEL_NAME}/chat/completions?api-version=2025-04-01-preview`;
     console.log('Request URL:', url);
-    
+  
+
     const response = await fetch(url, {
       method: 'POST',
       headers: {

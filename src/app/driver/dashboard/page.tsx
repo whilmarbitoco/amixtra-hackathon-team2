@@ -180,7 +180,11 @@ export default function DriverDashboard() {
         <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Routes</h2>
         <div className="space-y-4">
           {driverRoutes.map((route) => (
-            <div key={route.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+            <div 
+              key={route.id} 
+              onClick={() => router.push('/driver/history')}
+              className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+            >
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-blue-600" />
