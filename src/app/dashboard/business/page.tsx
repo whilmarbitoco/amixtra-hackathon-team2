@@ -1,8 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { io, Socket } from 'socket.io-client';
 import { useRouter } from "next/navigation";
 import { 
+  Navigation,
+  MapPin, 
+  Clock, 
+  Fuel, 
+  CheckCircle,
+  MessageSquare,
+  MessageCircle,
+  Route,
+  User,
+  Send,
   DollarSign, 
   TrendingUp, 
   Users, 
@@ -26,6 +37,20 @@ export default function BusinessDashboard() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [bookings, setBookings] = useState<any[]>([]);
+  
+  // New state for enhanced features
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
+  const [routeHistory, setRouteHistory] = useState<RouteHistory[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [connectedUsers, setConnectedUsers] = useState(0);
+  const [currentRoute, setCurrentRoute] = useState('');
+
+  const startInputRef = useRef<HTMLDivElement>(null);
+  const finishInputRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const currentUser = localStorage.getItem("currentUser");
@@ -41,6 +66,97 @@ export default function BusinessDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("currentUser");
     router.push("/");
+  };
+  
+  useEffect(() => {
+    // Initialize socket connection
+    const newSocket = io('http://localhost:3001');
+    
+    newSocket.on('connect', () => {
+      console.log('Connected to chat server');
+    });
+    
+    newSocket.on('message', (message: ChatMessage) => {
+      setChatMessages(prev => [...prev, message]);
+    });
+    
+    newSocket.on('userCount', (count: number) => {
+      setConnectedUsers(count);
+    });
+    
+    setSocket(newSocket);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (startInputRef.current && !startInputRef.current.contains(event.target as Node)) {
+        setShowStartSuggestions(false);
+      }
+      if (finishInputRef.current && !finishInputRef.current.contains(event.target as Node)) {
+        setShowFinishSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      newSocket.disconnect();
+    };
+  }, []);
+
+  // Auto-scroll chat to bottom
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const handleStartInputChange = (value: string) => {
+    setStart(value);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(async () => {
+        const suggestions = await searchLocations(value);
+        setStartSuggestions(suggestions);
+        setShowStartSuggestions(true);
+      }, 300);
+    } else {
+      setShowStartSuggestions(false);
+    }
+  };
+
+  const handleFinishInputChange = (value: string) => {
+    setFinish(value);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    if (value.length >= 2) {
+      searchTimeoutRef.current = setTimeout(async () => {
+        const suggestions = await searchLocations(value);
+        setFinishSuggestions(suggestions);
+        setShowFinishSuggestions(true);
+      }, 300);
+    } else {
+      setShowFinishSuggestions(false);
+    }
+  };
+
+  const sendMessage = () => {
+    if (!newMessage.trim() || !socket || !currentRoute) return;
+    
+    const message: ChatMessage = {
+      id: Date.now().toString(),
+      user: 'Driver',
+      message: newMessage,
+      timestamp: new Date(),
+      type: 'message'
+    };
+    
+    socket.emit('sendMessage', { route: currentRoute, message });
+    setNewMessage('');
   };
 
   if (!user) return (
@@ -213,67 +329,49 @@ export default function BusinessDashboard() {
             </div>
           </div>
 
-          {/* Quick Actions & Performance */}
-          <div className="space-y-8">
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
-              <div className="space-y-4">
-                <button className="w-full flex items-center gap-3 p-4 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors">
-                  <Plus className="h-6 w-6 text-emerald-600" />
-                  <span className="font-medium text-emerald-900">Add Vehicle</span>
-                </button>
-                
-                <button className="w-full flex items-center gap-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
-                  <Eye className="h-6 w-6 text-blue-600" />
-                  <span className="font-medium text-blue-900">View Reports</span>
-                </button>
-                
-                <button className="w-full flex items-center gap-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
-                  <BarChart3 className="h-6 w-6 text-purple-600" />
-                  <span className="font-medium text-purple-900">Analytics</span>
-                </button>
-                
-                <button className="w-full flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
-                  <Users className="h-6 w-6 text-orange-600" />
-                  <span className="font-medium text-orange-900">Manage Drivers</span>
-                </button>
-                
-                <button className="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
-                  <Settings className="h-6 w-6 text-gray-600" />
-                  <span className="font-medium text-gray-900">Settings</span>
-                </button>
+          {/* OpenAI Chat */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow-md h-[600px] flex flex-col">
+              <div className="p-4 border-b">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-blue-600" />
+                  GreenBridge AI Assistant
+                </h3>
               </div>
-            </div>
-
-            {/* Performance Metrics */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Performance</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-emerald-600" />
-                    <span className="text-sm font-medium">Revenue Growth</span>
+              
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {chatMessages.map((msg) => (
+                  <div key={msg.id} className={`p-3 rounded-lg ${
+                    msg.type === 'alert' ? 'bg-red-50 border border-red-200' : 'bg-gray-50'
+                  }`}>
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="font-medium text-sm text-gray-900">{msg.user}</span>
+                      <span className="text-xs text-gray-500">
+                        {msg.timestamp.toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-700">{msg.message}</p>
                   </div>
-                  <span className="text-emerald-600 font-bold">+{businessAnalytics.monthlyGrowth}%</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium">Completed Trips</span>
-                  </div>
-                  <span className="text-blue-600 font-bold">{businessAnalytics.completedTrips}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm font-medium">Fleet Utilization</span>
-                  </div>
-                  <span className="text-purple-600 font-bold">78%</span>
-                </div>
+                ))}
+                <div ref={chatEndRef} />
               </div>
+              
+                  <div className="flex gap-2 m-3">
+                    <input
+                      type="text"
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      placeholder="Share route info..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={sendMessage}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                </div>
             </div>
           </div>
         </div>
