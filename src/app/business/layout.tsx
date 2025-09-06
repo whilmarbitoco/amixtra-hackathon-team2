@@ -29,7 +29,7 @@ export default function BusinessLayout({
   };
 
   const navItems = [
-    { href: "#", icon: <Home className="h-5 w-5" />, label: "Dashboard", isActive: true },
+    { href: "/business/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
     { href: "#", icon: <Truck className="h-5 w-5" />, label: "Fleet Management" },
     { href: "#", icon: <Calendar className="h-5 w-5" />, label: "Bookings" },
     { href: "#", icon: <UserCheck className="h-5 w-5" />, label: "Drivers" },
@@ -46,7 +46,6 @@ export default function BusinessLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex">
-      {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg">
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-900">Business Panel</h2>
@@ -56,11 +55,7 @@ export default function BusinessLayout({
             <a 
               key={index}
               href={item.href} 
-              className={`flex items-center gap-3 px-6 py-3 ${
-                item.isActive 
-                  ? 'text-emerald-600 bg-emerald-50 border-r-2 border-emerald-600' 
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
+              className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50"
             >
               {item.icon}
               {item.label}
@@ -76,12 +71,10 @@ export default function BusinessLayout({
         </nav>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1">
-        {/* Top Bar */}
         <div className="bg-white shadow-sm border-b px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Business Portal</h1>
             <span className="text-gray-600">Welcome, {user?.name}</span>
           </div>
         </div>

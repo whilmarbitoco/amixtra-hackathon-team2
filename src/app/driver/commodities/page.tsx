@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Package, MapPin, Calendar, DollarSign, Phone, AlertCircle, Weight } from "lucide-react";
 import { commodities } from "@/constants";
-import ListingWrapper from "@/components/ListingWrapper";
 
 export default function CommoditiesListing() {
   const [filter, setFilter] = useState("All");
@@ -13,11 +12,7 @@ export default function CommoditiesListing() {
     : commodities.filter(c => c.urgency === filter);
 
   return (
-    <ListingWrapper 
-      title="Commodity Listings" 
-      description="Find transportation requests for agricultural commodities"
-    >
-      <div className="container mx-auto px-6 py-8">
+    <>
         {/* Filter */}
         <div className="mb-8">
           <div className="flex gap-3">
@@ -95,7 +90,6 @@ export default function CommoditiesListing() {
             </div>
           ))}
         </div>
-      </div>
-    </ListingWrapper>
+    </>
   );
 }

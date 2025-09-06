@@ -29,10 +29,10 @@ export default function DriverLayout({
   };
 
   const navItems = [
-    { href: "#", icon: <Home className="h-5 w-5" />, label: "Dashboard", isActive: true },
+    { href: "/driver/dashboard", icon: <Home className="h-5 w-5" />, label: "Dashboard" },
+    { href: "/driver/commodities", icon: <FileText className="h-5 w-5" />, label: "Browse Commodities" },
     { href: "#", icon: <Route className="h-5 w-5" />, label: "My Routes" },
     { href: "#", icon: <Truck className="h-5 w-5" />, label: "Vehicle Info" },
-    { href: "#", icon: <FileText className="h-5 w-5" />, label: "Trip History" },
     { href: "#", icon: <Fuel className="h-5 w-5" />, label: "Fuel Log" },
     { href: "#", icon: <User className="h-5 w-5" />, label: "Profile" },
     { href: "#", icon: <Settings className="h-5 w-5" />, label: "Settings" },
@@ -46,7 +46,6 @@ export default function DriverLayout({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex">
-      {/* Sidebar */}
       <div className="w-64 bg-white shadow-lg">
         <div className="p-6">
           <h2 className="text-xl font-bold text-gray-900">Driver Panel</h2>
@@ -56,11 +55,7 @@ export default function DriverLayout({
             <a 
               key={index}
               href={item.href} 
-              className={`flex items-center gap-3 px-6 py-3 ${
-                item.isActive 
-                  ? 'text-blue-600 bg-blue-50 border-r-2 border-blue-600' 
-                  : 'text-gray-600 hover:bg-gray-50'
-              }`}
+              className="flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50"
             >
               {item.icon}
               {item.label}
@@ -76,12 +71,10 @@ export default function DriverLayout({
         </nav>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1">
-        {/* Top Bar */}
         <div className="bg-white shadow-sm border-b px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Driver Portal</h1>
             <span className="text-gray-600">Welcome, {user?.name}</span>
           </div>
         </div>
