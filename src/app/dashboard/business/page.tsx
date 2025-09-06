@@ -111,7 +111,7 @@ export default function BusinessDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Total Revenue</p>
-                <p className="text-3xl font-bold text-emerald-600">₹{businessAnalytics.totalRevenue.toLocaleString()}</p>
+                <p className="text-3xl font-bold text-emerald-600">₱{businessAnalytics.totalRevenue.toLocaleString()}</p>
                 <p className="text-sm text-emerald-600 mt-1">+{businessAnalytics.monthlyGrowth}% this month</p>
               </div>
               <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
