@@ -36,6 +36,9 @@ export default function Login() {
         router.push("/business/dashboard");
       } else if (user.role === "driver") {
         router.push("/driver/dashboard");
+      } else {
+        setError("Invalid user role");
+        return;
       }
     } catch (err: any) {
       setError(err.message || "Invalid credentials");

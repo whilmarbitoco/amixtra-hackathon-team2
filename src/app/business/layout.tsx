@@ -20,24 +20,35 @@ export default function BusinessLayout({
 
   useEffect(() => {
     const checkUser = async () => {
-      const userWithProfile = await checkUserRole('business_owner')
-      
-      if (!userWithProfile) {
+      try {
+        const userWithProfile = await checkUserRole('business_owner')
+        
+        if (!userWithProfile) {
+          router.push("/login")
+          return
+        }
+        
+        setUser(userWithProfile)
+        setLegacyUserData(userWithProfile)
+      } catch (error) {
+        console.error('Auth check failed:', error)
         router.push("/login")
-        return
       }
-      
-      setUser(userWithProfile)
-      setLegacyUserData(userWithProfile)
     }
     
     checkUser()
   }, [router]);
 
   const handleLogout = async () => {
-    await signOut()
-    localStorage.removeItem("currentUser")
-    router.push("/")
+    try {
+      await signOut()
+      localStorage.removeItem("currentUser")
+      router.push("/")
+    } catch (error) {
+      console.error('Logout failed:', error)
+      localStorage.removeItem("currentUser")
+      router.push("/")
+    }
   };
 
   const navItems = [
@@ -58,7 +69,7 @@ export default function BusinessLayout({
           {navItems.map((item, index) => {
             const isActive = pathname === item.href;
             return (
-              <a 
+              <Link 
                 key={index}
                 href={item.href} 
                 className={`flex items-center gap-3 px-6 py-3 transition-colors ${
@@ -69,7 +80,7 @@ export default function BusinessLayout({
               >
                 {item.icon}
                 {item.label}
-              </a>
+              </Link>
             );
           })}
           <button 

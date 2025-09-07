@@ -2,19 +2,24 @@ import { supabase } from './supabase'
 import type { UserProfile } from './supabase'
 
 export const getUserWithProfile = async () => {
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) return null
+  try {
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    
+    if (userError || !user) return null
 
-  const { data: profile } = await supabase
-    .from('user_information')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
+    const { data: profile, error: profileError } = await supabase
+      .from('user_information')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
 
-  if (!profile) return null
+    if (profileError || !profile) return null
 
-  return { ...user, ...profile }
+    return { ...user, ...profile }
+  } catch (error) {
+    console.error('Error getting user profile:', error)
+    return null
+  }
 }
 
 export const checkUserRole = async (requiredRole: 'business_owner' | 'driver') => {
