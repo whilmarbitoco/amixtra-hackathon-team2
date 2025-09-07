@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/lib/auth";
+import { log } from "console";
 
 export default function Login() {
   const router = useRouter();
@@ -26,8 +27,10 @@ export default function Login() {
         id: user.id,
         name: user.fullname,
         email: user.email,
-        role: user.role === "BUSINESS_OWNER" ? "business" : "driver"
+        role: user.role === "BUSINESS_OWNER" ? "business_owner" : "driver"
       }));
+
+      
       
       if (user.role === "business_owner") {
         router.push("/business/dashboard");

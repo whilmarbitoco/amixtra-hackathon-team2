@@ -3,19 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { X, Truck, Plus, Settings, CheckCircle, XCircle, Brain, TrendingUp, Target, Gauge } from "lucide-react";
-
-interface Vehicle {
-  id: string;
-  make: string;
-  model: string;
-  year: string;
-  licensePlate: string;
-  capacity: string;
-  vehicleType: string;
-  status: "active" | "inactive";
-  driverId: string;
-  image?: string;
-}
+import { Vehicle, heavyDutyVehicles } from "@/constants";
 
 export default function DriverVehicles() {
   const router = useRouter();
@@ -39,64 +27,10 @@ export default function DriverVehicles() {
       return;
     }
     setCurrentUser(user);
-    initializeMockData(user.id);
-    loadVehicles(user.id);
+    setVehicles(heavyDutyVehicles);
   }, [router]);
 
-  const initializeMockData = (driverId: string) => {
-    const existingVehicles = JSON.parse(localStorage.getItem("vehicles") || "[]");
-    const userVehicles = existingVehicles.filter((v: Vehicle) => v.driverId === driverId);
-    
-    if (userVehicles.length === 0) {
-      const mockVehicles: Vehicle[] = [
-        {
-          id: "1",
-          make: "Ford",
-          model: "F-150",
-          year: "2022",
-          licensePlate: "ABC-123",
-          capacity: "2.5",
-          vehicleType: "pickup",
-          status: "active",
-          driverId: driverId,
-          image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
-        },
-        {
-          id: "2",
-          make: "Chevrolet",
-          model: "Silverado",
-          year: "2021",
-          licensePlate: "XYZ-789",
-          capacity: "3.0",
-          vehicleType: "truck",
-          status: "active",
-          driverId: driverId,
-          image: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=400"
-        },
-        {
-          id: "3",
-          make: "Mercedes",
-          model: "Sprinter",
-          year: "2020",
-          licensePlate: "DEF-456",
-          capacity: "1.5",
-          vehicleType: "van",
-          status: "inactive",
-          driverId: driverId,
-          image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=400"
-        }
-      ];
-      
-      const allVehicles = [...existingVehicles, ...mockVehicles];
-      localStorage.setItem("vehicles", JSON.stringify(allVehicles));
-    }
-  };
 
-  const loadVehicles = (driverId: string) => {
-    const storedVehicles = JSON.parse(localStorage.getItem("vehicles") || "[]");
-    const userVehicles = storedVehicles.filter((v: Vehicle) => v.driverId === driverId);
-    setVehicles(userVehicles);
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,10 +41,6 @@ export default function DriverVehicles() {
       status: "active",
       driverId: currentUser.id
     };
-
-    const storedVehicles = JSON.parse(localStorage.getItem("vehicles") || "[]");
-    const updatedVehicles = [...storedVehicles, newVehicle];
-    localStorage.setItem("vehicles", JSON.stringify(updatedVehicles));
     
     setVehicles([...vehicles, newVehicle]);
     setFormData({
@@ -126,12 +56,9 @@ export default function DriverVehicles() {
   };
 
   const toggleVehicleStatus = (vehicleId: string) => {
-    const storedVehicles = JSON.parse(localStorage.getItem("vehicles") || "[]");
-    const updatedVehicles = storedVehicles.map((v: Vehicle) => 
+    setVehicles(vehicles.map(v => 
       v.id === vehicleId ? { ...v, status: v.status === "active" ? "inactive" : "active" } : v
-    );
-    localStorage.setItem("vehicles", JSON.stringify(updatedVehicles));
-    loadVehicles(currentUser.id);
+    ));
   };
 
   if (!currentUser) return (

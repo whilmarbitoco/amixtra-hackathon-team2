@@ -111,6 +111,94 @@ export const businessAnalytics = {
   activeVehicles: 24
 };
 
+export interface Vehicle {
+  id: string;
+  make: string;
+  model: string;
+  year: string;
+  licensePlate: string;
+  capacity: string;
+  vehicleType: string;
+  status: "active" | "inactive";
+  driverId: string;
+  image?: string;
+}
+
+export const heavyDutyVehicles: Vehicle[] = [
+  {
+    id: "1",
+    make: "Peterbilt",
+    model: "579 Semi-Trailer",
+    year: "2023",
+    licensePlate: "18W-001",
+    capacity: "40.0",
+    vehicleType: "truck",
+    status: "active",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1601362840469-51e4d8d58785?w=400"
+  },
+  {
+    id: "2",
+    make: "Caterpillar",
+    model: "773G Dump Truck",
+    year: "2022",
+    licensePlate: "DMP-002",
+    capacity: "45.0",
+    vehicleType: "truck",
+    status: "active",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+  },
+  {
+    id: "3",
+    make: "Mack",
+    model: "Granite Flatbed",
+    year: "2021",
+    licensePlate: "FLT-003",
+    capacity: "25.0",
+    vehicleType: "truck",
+    status: "active",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+  },
+  {
+    id: "4",
+    make: "Kenworth",
+    model: "T880 Lowboy Trailer",
+    year: "2023",
+    licensePlate: "LOW-004",
+    capacity: "80.0",
+    vehicleType: "trailer",
+    status: "active",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+  },
+  {
+    id: "5",
+    make: "Volvo",
+    model: "A60H Articulated Dump",
+    year: "2022",
+    licensePlate: "ADT-005",
+    capacity: "55.0",
+    vehicleType: "truck",
+    status: "inactive",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+  },
+  {
+    id: "6",
+    make: "Freightliner",
+    model: "M2 Tank Truck",
+    year: "2021",
+    licensePlate: "TNK-006",
+    capacity: "30.0",
+    vehicleType: "truck",
+    status: "active",
+    driverId: "",
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400"
+  }
+];
+
 export const vehicles = [
   { id: 1, type: 'Truck', status: 'Available', capacity: '10 tons' },
   { id: 2, type: 'Van', status: 'In Transit', capacity: '2 tons' },
